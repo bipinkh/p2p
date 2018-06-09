@@ -114,6 +114,8 @@ public class KademliaApiController {
         }
         catch (NoSuchElementException e){
             LOGGER.info("/fetch/"+paramKey+" : not found!");
+        } catch (com.soriole.kademlia.core.KadProtocol.ContentNotFoundException e) {
+            e.printStackTrace();
         }
         return "Null";
     }

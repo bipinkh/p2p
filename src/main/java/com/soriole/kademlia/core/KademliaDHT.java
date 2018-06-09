@@ -157,6 +157,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
                 }
             }
         }
+        putLocal(key,value);
         return successes;
 
     }
@@ -168,7 +169,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         return timestampedStore.get(key);
     }
     @Override
-    public TimeStampedData<byte[]> get(Key key) throws NoSuchElementException,ServerShutdownException {
+    public TimeStampedData<byte[]> get(Key key) throws ContentNotFoundException, ServerShutdownException {
         LOGGER.debug("get("+key+")");
         // the lists to track remaining nodes to query and queried nodes.
         Collection<NodeInfo> closestNodes = bucket.getClosestNodes(key);
@@ -207,15 +208,23 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             nodesToQuery.removeAll(queriedNodes);
         }
         // return the most latest value.
-        TimeStampedData<byte[]> local= timestampedStore.get(key);
-        if(local!=null) {
-            if(!dataMessages.isEmpty() &&
-                local.getInsertionTime() > dataMessages.last().updatedtime    ){
-                 return dataMessages.last().toTimeStampedData();
+        try {
+            TimeStampedData<byte[]> local = timestampedStore.get(key);
+            if (local != null) {
+                if (!dataMessages.isEmpty() &&
+                        local.getInsertionTime() > dataMessages.last().updatedtime) {
+                    return dataMessages.last().toTimeStampedData();
+                }
+                return local;
             }
-            return local;
+            return dataMessages.last().toTimeStampedData();
         }
-        return dataMessages.last().toTimeStampedData();
+        // NoSuchElementException is thrown by the sortedSet.last() method.
+        // for some reason NoSuchElementException is a Runtime Exception.
+        // Side effect being that even if we don't catch it, compiler or ide won't complain
+        catch (NoSuchElementException e){
+            throw new ContentNotFoundException();
+        }
 
     }
 

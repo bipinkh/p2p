@@ -1,7 +1,7 @@
 package com.soriole.kademlia.network.receivers;
 
-import com.soriole.kademlia.core.store.Key;
+import com.soriole.kademlia.core.store.NodeInfo;
 
 public interface ByteReceiver {
-    public void onNewMessage(Key key, byte[] message);
+    public void onNewMessage(NodeInfo key, long sessionId, byte[] message);
 }

@@ -3,7 +3,7 @@ package com.soriole.kademlia.network;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NonKademliaMessage;
 import com.soriole.kademlia.core.store.ContactBucket;
-import com.soriole.kademlia.core.store.Key;
+import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.store.TimestampedStore;
 import com.soriole.kademlia.network.receivers.ByteReceiver;
 import org.slf4j.Logger;
@@ -29,7 +29,7 @@ public class ExtendedKademliaMessageServer extends KademliaMessageServer {
     @Override
     protected void OnNewMessage(final Message message) {
         if(message instanceof NonKademliaMessage){
-            receiver.onNewMessage(message.mSrcNodeInfo.getKey(),((NonKademliaMessage) message).rawBytes);
+            receiver.onNewMessage(message.mSrcNodeInfo.getKey(),message.sessionId, ((NonKademliaMessage) message).rawBytes);
         }
         super.OnNewMessage(message);
     }
@@ -40,7 +40,7 @@ public class ExtendedKademliaMessageServer extends KademliaMessageServer {
     public static ByteReceiver getDefaultReceiver(){
         return new ByteReceiver() {
             @Override
-            public void onNewMessage(Key key, byte[] message) {
+            public void onNewMessage(NodeInfo key, long sessionId, byte[] message) {
                 logger.info("NonKademlia Message from "+key+" dropped by default!");
             }
         };
