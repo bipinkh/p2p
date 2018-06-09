@@ -1,4 +1,4 @@
-package com.endtoendmessenging;
+package com.endtoendmessenging.service;
 
 import com.endtoendmessenging.model.Subscription;
 import com.endtoendmessenging.security.communication.message.*;
@@ -56,8 +56,8 @@ public class MessageListenerService {
                 }
             }
             reply(new AcknowledgeMessage());
-
         }
+
 
         else if (m instanceof SubscriptionMessage){
             Key clientKey=new Key(m.sender);
@@ -87,8 +87,6 @@ public class MessageListenerService {
                 e.printStackTrace();
                 return false;
             }
-
-
         }
         else if(m instanceof KeyExchangeMessage){
             reply(m);

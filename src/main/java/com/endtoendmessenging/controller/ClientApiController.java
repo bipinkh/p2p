@@ -1,7 +1,7 @@
 package com.endtoendmessenging.controller;
 
-import com.endtoendmessenging.KademliaAdapterService;
-import com.endtoendmessenging.MessageListenerService;
+import com.endtoendmessenging.service.KademliaAdapterService;
+import com.endtoendmessenging.service.MessageListenerService;
 import com.endtoendmessenging.model.Message;
 import com.endtoendmessenging.model.remote.MessageCollecitonBean;
 import com.endtoendmessenging.repository.MessageRepositoryImplementaion;

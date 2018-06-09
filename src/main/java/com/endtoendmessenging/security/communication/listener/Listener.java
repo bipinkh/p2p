@@ -1,6 +1,6 @@
 package com.endtoendmessenging.security.communication.listener;
 
-import com.endtoendmessenging.KademliaAdapterService;
+import com.endtoendmessenging.service.KademliaAdapterService;
 import com.endtoendmessenging.security.communication.message.Message;
 
 /**

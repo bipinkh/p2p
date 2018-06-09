@@ -1,4 +1,4 @@
-package com.endtoendmessenging;
+package com.endtoendmessenging.service;
 
 import com.endtoendmessenging.security.communication.message.*;
 import com.endtoendmessenging.security.communication.MessageFactory;
