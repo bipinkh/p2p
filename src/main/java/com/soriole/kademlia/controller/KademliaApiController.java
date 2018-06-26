@@ -134,13 +134,15 @@ public class KademliaApiController {
         NodeInfo nodeInfo=new NodeInfo(new Key(nodeId),new InetSocketAddress(newAddress,port));
 
         NodeInfo currentNode=kademliaService.getDHT().getLocalNode();
-        if(kademliaService.getDHT().ping(currentNode)>=0){
-            kademliaService.getDHT().updateNode(nodeInfo.getKey(),nodeInfo.getLanAddress());
-            return "Success";
+        if(kademliaService.getDHT().ping(nodeInfo)>=0){
+
+            if(kademliaService.getDHT().updateNode(nodeInfo.getKey(),nodeInfo.getLanAddress())){
+                return "Success";
+            }
+
         }
-        else {
-            return "Error connecting to node.";
-        }
+        return "Error connecting to node.";
+
 
     }
     @GetMapping("/refreshTable")

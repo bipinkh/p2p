@@ -355,26 +355,34 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     private void validateRoutingTable(){
         LOGGER.debug(" ValudateRoutingTable ");
         while(true){
-            Contact c = this.bucket.getMostInactiveContact();
-            long currentTime = System.currentTimeMillis();
-            if (c != null) {
-                if ((currentTime - c.getLastActive().getTime()) > this.defaultNodeExpirationTime) {
-                    if (this.ping(c.getNodeInfo()) < 0) {
-                        LOGGER.info("Peer "+c.getNodeInfo().getKey()+": has gone offline.");
-                        this.bucket.removeNode(c.getNodeInfo().getKey());
-                        continue;
+            try {
+                Contact c = this.bucket.getMostInactiveContact();
+
+                long currentTime = System.currentTimeMillis();
+                if (c != null) {
+                    if ((currentTime - c.getLastActive().getTime()) > this.defaultNodeExpirationTime) {
+                        if (this.ping(c.getNodeInfo()) < 0) {
+                            LOGGER.info("Peer " + c.getNodeInfo().getKey() + ": has gone offline.");
+                            this.bucket.removeNode(c.getNodeInfo().getKey());
+                            continue;
+                        }
                     }
                 }
+                break;
             }
-            break;
+            catch (NoSuchElementException e){
+                return ;
+            }
         }
 
     }
-    public void updateNode(Key key,InetSocketAddress newAddress){
+    public boolean updateNode(Key key,InetSocketAddress newAddress){
         NodeInfo n =bucket.getNode(key);
         if(n!=null){
             n.setLanAddress(newAddress);
+            return true;
         }
+        return false;
     }
 
     public NodeInfo getLocalNode() {

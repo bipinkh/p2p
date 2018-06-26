@@ -111,6 +111,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<mainClass>com.endtoendmessenging.EndToEndMessengingNodeApplication</mainClass>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
