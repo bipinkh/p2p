@@ -21,8 +21,9 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     protected final KademliaMessageServer server;
     // TimestampedStore with 24 hours expiration time.
     static final long defaultExpirationTime = 1000 * 60 * 60;
-    static final long defaultNodeExpirationTime=1000*60;
+    static final long defaultNodeExpirationTime = 1000 * 35;
     private Thread bucketValidationThread;
+    private Thread udpPunctureThread;
     protected final TimestampedStore<byte[]> timestampedStore;
 
     public KademliaDHT(ContactBucket bucket, KademliaMessageServer server, TimestampedStore<byte[]> store) {
@@ -327,7 +328,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     }
 
     public boolean stop() {
-        if(this.server.stop()){
+        if (this.server.stop()) {
             this.bucketValidationThread.interrupt();
             return true;
         }
@@ -336,12 +337,12 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     }
 
     public boolean start() throws SocketException {
-        if(this.server.start()) {
-            this.bucketValidationThread=new Thread(() -> {
+        if (this.server.start()) {
+            this.bucketValidationThread = new Thread(() -> {
                 while (true) {
                     try {
                         validateRoutingTable();
-                        Thread.sleep(defaultExpirationTime);
+                        Thread.sleep(defaultNodeExpirationTime);
                     } catch (InterruptedException e) {
                         return;
                     }
@@ -352,9 +353,10 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         }
         return false;
     }
-    private void validateRoutingTable(){
-        LOGGER.debug(" ValudateRoutingTable ");
-        while(true){
+
+    private void validateRoutingTable() {
+        LOGGER.debug(" ValidateRoutingTable");
+        while (true) {
             try {
                 Contact c = this.bucket.getMostInactiveContact();
 
@@ -369,16 +371,16 @@ public class KademliaDHT implements KadProtocol<byte[]> {
                     }
                 }
                 break;
-            }
-            catch (NoSuchElementException e){
-                return ;
+            } catch (NoSuchElementException e) {
+                return;
             }
         }
 
     }
-    public boolean updateNode(Key key,InetSocketAddress newAddress){
-        NodeInfo n =bucket.getNode(key);
-        if(n!=null){
+
+    public boolean updateNode(Key key, InetSocketAddress newAddress) {
+        NodeInfo n = bucket.getNode(key);
+        if (n != null) {
             n.setLanAddress(newAddress);
             return true;
         }
@@ -411,7 +413,45 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         }).start();
     }
 
+    public boolean startUdpPuncture(long waitTiimeMs) {
+        if (udpPunctureThread != null) {
+            if (udpPunctureThread.isAlive()) {
+                return false;
+            }
+        }
 
+        Thread udpPunctureThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(true){
+                    Collection<NodeInfo> routingTable = getRoutingTable();
+                    if(routingTable.size()>0){
+                        Random rnd = new Random();
+                        int i = rnd.nextInt(routingTable.size());
+                        ping(routingTable.toArray(new NodeInfo[0])[i]);
+                    }
+                    try {
+                        Thread.sleep(waitTiimeMs);
+                    } catch (InterruptedException e) {
+                        return;
+                    }
+                }
+            }
+        });
+        udpPunctureThread.start();
+
+        return true;
+    }
+
+    public boolean stopUdpPuncture() {
+        if (udpPunctureThread != null) {
+            if (udpPunctureThread.isAlive()) {
+                udpPunctureThread.interrupt();
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
 
