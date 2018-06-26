@@ -1,13 +1,13 @@
 package com.endtoendmessenging.service;
 
+import com.endtoendmessenging.repository.MessageRepository;
 import com.endtoendmessenging.security.communication.message.*;
 import com.endtoendmessenging.security.communication.MessageFactory;
 import com.endtoendmessenging.security.crypto.DHKeyPair;
 import com.endtoendmessenging.security.crypto.KeyFactory;
 import com.endtoendmessenging.model.Subscription;
-import com.endtoendmessenging.repository.MessageRepositoryImplementaion;
 import com.endtoendmessenging.repository.SubscriptionRepository;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.soriole.kademlia.core.KadProtocol;
 import com.soriole.kademlia.core.KademliaExtendedDHT;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
@@ -23,12 +23,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.Random;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -43,20 +40,20 @@ public class KademliaAdapterService implements ByteReceiver {
     String seed;
 
     // sessions to key mapping
-    HashMap<byte[],Key> sessions;
+    HashMap<byte[], Key> sessions;
     // Contains the messageFactories to encrypt/decrypt incoming messages
-    HashMap<byte[],MessageFactory> messageFactories;
-    HashMap<byte[],MessageFactory> unVerifiedFactories;
-    HashMap<byte[],NodeInfo> sessionNodeInfo;
+    HashMap<byte[], MessageFactory> messageFactories;
+    HashMap<byte[], MessageFactory> unVerifiedFactories;
+    HashMap<byte[], NodeInfo> sessionNodeInfo;
     // key to session mapping
-    HashMap<Key,byte[]> localSessions;
+    HashMap<Key, byte[]> localSessions;
     HashMap<byte[], byte[]> foreignSessions;
 
 
     public int bucketSize;
 
     @Autowired
-    MessageRepositoryImplementaion messageStore;
+    MessageRepository messageRepository;
 
     @Autowired
     SubscriptionRepository subscriptionRepository;
@@ -67,8 +64,6 @@ public class KademliaAdapterService implements ByteReceiver {
 
     MessageFactory messageFactory;
 
-    @Autowired
-    MessageListenerService listenerService;
 
     @PostConstruct
     public void init() {
@@ -79,25 +74,6 @@ public class KademliaAdapterService implements ByteReceiver {
 
     }
 
-    public boolean addSubscription(byte[] clientId, long subscriptionTimeSeconds) {
-        TimeStampedData<byte[]> data = kademliaService.getDHT().getLocal(new Key(clientId));
-        // we cannot add the subscription, its already added.
-        if (data != null) {
-            return false;
-        }
-        if (kademliaService.getDHT().getLocalNode().getKey().equals(new Key(clientId))) {
-            Subscription subscription = new Subscription();
-            subscription.setSubscriber(new Key(clientId).toBytes());
-            subscription.setSubscriptionStart(new Date());
-            // subscription expires in a month period.
-            subscription.setSubscriptionExpiry(new Date(new Date().getTime() + subscriptionTimeSeconds * 1000));
-            subscriptionRepository.save(subscription);
-            return true;
-        }
-        // we won't forward the subscription message to another node here.
-        else return false;
-
-    }
 
     public boolean updateSubscription(byte[] clientId, long addedSubscriptionTimeSeconds) {
         // TODO: function not implemented
@@ -110,170 +86,82 @@ public class KademliaAdapterService implements ByteReceiver {
     }
 
     /**
-     * @param receiverKey we know the receiver
-     * @param message     we need to send a byte message to receiver.
+     * @param receiverID we know the receiver
+     * @param message    we need to send a byte message to receiver.
      * @return
      */
-    public boolean sendMessageToNode(Key receiverKey,long sessionId, Message message) {
-        try {
-            Key receiver=sessions.get(receiverKey);
 
-            byte[] messageBytes = messageFactory.serializeAndEncrypt(message);
-            kademliaService.getDHT().sendMessageToNode(receiverKey, messageBytes);
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (KademliaExtendedDHT.NoSuchNodeFoundException e) {
-            logger.info("Client not found for sending message : " + receiverKey);
-        } catch (ServerShutdownException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-    public boolean sendMessageToNode(Key receiverKey, Message message) {
-       return sendMessageToNode(receiverKey,0,message);
-    }
+    public boolean sendToClient(byte[] receiverID, byte[] message) throws KademliaExtendedDHT.NoSuchNodeFoundException,TimeoutException,KadProtocol.ContentNotFoundException {
 
-    public boolean sendToClient(byte[] recieverID, Message message) {
-        Key targetKey = new Key(recieverID);
-        ;
         // if we are the subscribed node of the receiver
-        if (subscriptionRepository.countBySubscriber(targetKey.toBytes())>0) {
-            messageStore.save(new com.endtoendmessenging.model.Message(targetKey.toBytes(), message.toBytes()));
+        if (subscriptionRepository.findById(receiverID).isPresent()) {
+            messageRepository.save(new com.endtoendmessenging.model.Message(receiverID, message));
             return true;
 
         }
         // otherwise we need to find the node subscribed by the client and fordward it to that node.
         try {
-            TimeStampedData<byte[]> data=kademliaService.getDHT().get(targetKey);
-            if(data==null){
-                return false;
-            }
-            Key nodeKey=new Key(data.getData());
+
+            TimeStampedData<byte[]> data = kademliaService.getDHT().get(new Key(receiverID));
+            Key nodeKey = new Key(data.getData());
 
             ClientMessage clientMessage = new ClientMessage();
-            clientMessage.messageData=message.toBytes();
-            clientMessage.receiver=targetKey.toBytes();
-            return this.sendMessageToNode(nodeKey,clientMessage);
+            clientMessage.messageData = message;
+            clientMessage.receiver = receiverID;
+
+            Message m = MessageFactory.createMessageInstance(kademliaService.getDHT().queryWithNode(nodeKey, MessageFactory.toUnencryptedBytes(clientMessage)));
+            if (m instanceof AcknowledgeMessage) {
+                if (((AcknowledgeMessage) m).isSuccess()) {
+                    return true;
+                }
+            }
 
         } catch (ServerShutdownException e) {
             e.printStackTrace();
-        } catch (com.soriole.kademlia.core.KadProtocol.ContentNotFoundException e) {
-
         }
         return false;
 
     }
-    public Message query(Key receiverKey,long sessionId,Message message){
-
-        try {
-            byte[] messageBytes = messageFactory.serializeAndEncrypt(message);
-            byte[] receivedMessage=kademliaService.getDHT().queryWithNode(receiverKey,sessionId, messageBytes);
-            Message reply=messageFactory.deSerilizeAndDecrypt(receivedMessage);
-            if(reply instanceof KeyExchangeMessage){
-                localSessions.put(receiverKey,reply.sender);
-                receivedMessage=kademliaService.getDHT().queryWithNode(receiverKey,sessionId, messageBytes);
-                reply=messageFactory.deSerilizeAndDecrypt(receivedMessage);
-                if(reply instanceof KeyExchangeMessage){
-                    logger.warn("The server sent KeyExchangeMessage twice.");
-                    return null;
-                }
-                return reply;
-            }
-
-        } catch (TimeoutException e) {
-            e.printStackTrace();
-        } catch (KademliaExtendedDHT.NoSuchNodeFoundException e) {
-            e.printStackTrace();
-        } catch (ServerShutdownException e) {
-            e.printStackTrace();
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvalidProtocolBufferException e) {
-            e.printStackTrace();
-        } catch (MessageFactory.AuthenticationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
 
     /**
      * // The function to handle new incoming Non-Kademlia messages
+     *
      * @param info
-     * @param sessionId
-     * @param message
+     * @param byteMessage
      */
     @Override
-    public void onNewMessage(NodeInfo info, long sessionId, byte[] message) {
-        Key key=info.getKey();
+    public byte[] onNewMessage(NodeInfo info, byte[] byteMessage) {
+        Key key = info.getKey();
         try {
 
-            // decode the message
-            TransparentMessage transparentMessage=MessageFactory.decerialize(message);
+            Message message = MessageFactory.createMessageInstance(byteMessage);
 
-            if(messageFactories.containsKey(transparentMessage.sender)){
-                // the message is for us
-                MessageFactory factory=messageFactories.get(transparentMessage.sender);
-                Message m=factory.decryptMessage(transparentMessage);
-                if(m instanceof ForwardMessage){
-                    // this is a forward Message and needs to be handled here.
-                    ForwardMessage forwardMessage= (ForwardMessage) m;
-                    if(forwardMessage.receiverKey!=null){
-                        this.kademliaService.getDHT().sendMessageToNode(forwardMessage.receiverKey,forwardMessage.messageByte);
-                        this.foreignSessions.put(forwardMessage.receiver,transparentMessage.sender);
+            if (message.receiver != null) {
+                if (new Key(message.receiver) != getLocalKey()) {
+                    // TODO: Forwarding messages not considered till now
+                }
+            }
+            if (message instanceof ClientMessage) {
+
+                if (new Key(kademliaService.getDHT().getLocal(new Key(message.receiver)).getData()).equals(getLocalKey())) {
+                    this.sendToClient(message.receiver, ((ClientMessage) message).messageData);
+                    return MessageFactory.toUnencryptedBytes(new AcknowledgeMessage(true));
+                }
+                return MessageFactory.toUnencryptedBytes(new AcknowledgeMessage(false));
+            }
+            if (message instanceof SubscriptionMessage) {
+                if (((SubscriptionMessage) message).nodeToSubscribe.equals(getLocalKey())) {
+                    if (this.subscribe(new Key(message.sender), ((SubscriptionMessage) message).nodeToSubscribe, 3600 * 24 * 30)) {
+                        return MessageFactory.toUnencryptedBytes(new AcknowledgeMessage(true));
                     }
                 }
-                listenerService.listenMessage(key,sessionId,m);
-
-
-
-            }
-            else if(foreignSessions.containsKey(transparentMessage.sender)){
-                // the message is sent to a session we know.
-                MessageFactory factory=messageFactories.get(transparentMessage.sender);
-                Message m=factory.decryptMessage(transparentMessage);
-                if(m instanceof PingMessage){
-                  // do nothing here.
-                }
-
-
-            }
-            else{
-                // no idea who's the receiver.
-                KeyExchangeMessage message1 = new KeyExchangeMessage();
-                MessageFactory factory=new MessageFactory(new KeyFactory());
-                unVerifiedFactories.put(transparentMessage.sender,factory);
-                factory.addSession(transparentMessage.sender);
-                message1.nounce=factory.getMySessionId();
-                this.kademliaService.getDHT().sendMessageToNode(key,sessionId,factory.serailizeTransparentLayer(message1));
-
-            }
-            Message message1 = MessageFactory.decerialize(message);
-            if(message1 instanceof KeyExchangeMessage){
-                this.localSessions.put(key,((KeyExchangeMessage) message1).nounce);
-                this.sessions.put(message1.sender,key);
-                this.sendMessageToNode(key,sessionId,message1);
-            }
-            else {
-                listenerService.ListenMessage(message1);
+                return MessageFactory.toUnencryptedBytes(new AcknowledgeMessage(false));
             }
 
-
-        } catch (InvalidProtocolBufferException | InstantiationException | InvocationTargetException | MessageFactory.AuthenticationException | IllegalAccessException | NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ServerShutdownException e) {
-            e.printStackTrace();
-        } catch (KademliaExtendedDHT.NoSuchNodeFoundException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     // seheduled every 5 minutes.
@@ -281,42 +169,61 @@ public class KademliaAdapterService implements ByteReceiver {
     private void checkSubscription() {
         //todo: check if subscription of any client has expired and do what needs to be done.
     }
-    public byte[] setupLocalSession(Key node){
-        byte[] sessionId=this.localSessions.get(node);
-        if(sessionId==null){
-            KeyExchangeMessage exchangeMessage = new KeyExchangeMessage();
-            exchangeMessage.nounce=new byte[32];
-            new Random().nextBytes(exchangeMessage.nounce);
-            try {
-                exchangeMessage.sender=messageFactory.getMySessionId();
-                byte[] returnData=kademliaService.getDHT().queryWithNode(node,exchangeMessage.toBytes());
-                KeyExchangeMessage msg= (KeyExchangeMessage) messageFactory.deSerilizeAndDecrypt(returnData);
-                if(Arrays.equals(msg.nounce,exchangeMessage.nounce)){
-                    return msg.sender;
-                }
-                return null;
-            } catch (TimeoutException e) {
-                e.printStackTrace();
-            } catch (KademliaExtendedDHT.NoSuchNodeFoundException e) {
-                e.printStackTrace();
-            } catch (ServerShutdownException e) {
-                e.printStackTrace();
-            } catch (InstantiationException e) {
-                e.printStackTrace();
-            } catch (InvocationTargetException e) {
-                e.printStackTrace();
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace();
-            } catch (InvalidProtocolBufferException e) {
-                e.printStackTrace();
-            } catch (MessageFactory.AuthenticationException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-            }
-            return null;
 
-        }
-        return this.localSessions.get(node);
+
+    public Key getLocalKey() {
+        return kademliaService.getDHT().getLocalNode().getKey();
     }
+
+    public Collection<NodeInfo> getPeers() {
+        return kademliaService.getDHT().getRoutingTable();
+    }
+
+    public boolean subscribe(Key clientKey, Key nodeKey, int subscriptionTimeSeconds) throws
+            KademliaExtendedDHT.NoSuchNodeFoundException, TimeoutException {
+        try {
+            try {
+                TimeStampedData<byte[]> data = kademliaService.getDHT().get(clientKey);
+                return false;
+            } catch (KadProtocol.ContentNotFoundException e) {
+
+            }
+
+            if (nodeKey.equals(getLocalKey())) {
+                Subscription subscription = new Subscription();
+                subscription.setSubscriber(clientKey.toBytes());
+                subscription.setSubscriptionStart(new Date());
+                // subscription expires in a month period.
+                subscription.setSubscriptionExpiry(new Date(new Date().getTime() + subscriptionTimeSeconds * 1000));
+                subscriptionRepository.save(subscription);
+
+                try {
+                    kademliaService.getDHT().put(clientKey, nodeKey.toBytes());
+                } catch (ServerShutdownException e) {
+                    e.printStackTrace();
+                }
+                return true;
+
+            }
+            SubscriptionMessage message = new SubscriptionMessage();
+            message.sender = clientKey.toBytes();
+            message.nodeToSubscribe = nodeKey;
+
+
+            Message m = MessageFactory.createMessageInstance(kademliaService.getDHT().queryWithNode(nodeKey, MessageFactory.toUnencryptedBytes(message)));
+            if (m instanceof AcknowledgeMessage) {
+                return ((AcknowledgeMessage) m).isSuccess();
+            }
+            throw new TimeoutException();
+        } catch (ServerShutdownException e) {
+            e.printStackTrace();
+            throw new TimeoutException();
+        }
+
+    }
+
+    public byte[] getValue(Key key) throws KadProtocol.ContentNotFoundException, ServerShutdownException {
+        return kademliaService.getDHT().get(key).getData();
+    }
+
 }

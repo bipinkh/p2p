@@ -187,7 +187,9 @@ public class KademliaMessageServer extends SessionServer {
      * @return True if server begins starts , False if server was already running
      * @throws SocketException
      */
-
+    public void submitTask(Runnable task){
+        this.workerPool.submit(task);
+    }
     public boolean start() throws SocketException {
         if (this.workerPool == null) {
             this.workerPool = Executors.newFixedThreadPool(nThreadCount);

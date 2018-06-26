@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.net.Inet4Address;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 
@@ -124,5 +127,25 @@ public class KademliaApiController {
     public String local(@PathVariable("key") String paramKey){
         // may be null.
         return new String(kademliaService.getDHT().getLocal(new Key(paramKey)).getData());
+    }
+    @GetMapping(value="/adjustAddress/{nodeid}:{address}:{port}")
+    public String adjustAddress(@PathVariable("nodeid")String nodeId,@PathVariable("address") String newAddress,@PathVariable("port") int port){
+
+        NodeInfo nodeInfo=new NodeInfo(new Key(nodeId),new InetSocketAddress(newAddress,port));
+
+        NodeInfo currentNode=kademliaService.getDHT().getLocalNode();
+        if(kademliaService.getDHT().ping(currentNode)>=0){
+            kademliaService.getDHT().updateNode(nodeInfo.getKey(),nodeInfo.getLanAddress());
+            return "Success";
+        }
+        else {
+            return "Error connecting to node.";
+        }
+
+    }
+    @GetMapping("/refreshTable")
+    public String refreshPeers(){
+        kademliaService.getDHT().refreshRoutingTable();
+        return "Refreshing Peers in background";
     }
 }

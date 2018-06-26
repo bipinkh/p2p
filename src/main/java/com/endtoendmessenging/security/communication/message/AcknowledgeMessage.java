@@ -37,4 +37,7 @@ public class AcknowledgeMessage extends Message {
             throw new RuntimeException("Please update the software");
         }
     }
+    public boolean isSuccess(){
+        return acknowledge;
+    }
 }

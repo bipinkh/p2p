@@ -1,26 +1,35 @@
 package com.endtoendmessenging.model;
 
-import com.endtoendmessenging.EndToEndMessengingNodeApplication;
-import com.soriole.kademlia.core.messages.listeners.ListenerType;
 import com.soriole.kademlia.core.store.Key;
+import org.springframework.format.annotation.DateTimeFormat;
 
-import javax.validation.constraints.Max;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.Date;
 
 /**
  * stores incoming messages for the subscribed client
  */
+@Entity
 public class Message {
+    @Id
+    @GeneratedValue
     int id;
+    @Column
     byte[] message;
+    @Column
     byte[] receiver;
-    Date receicedTimestamp;
+    @Column
+    Date receivedTimestamp;
+    @Column
     boolean synced;
     public Message(){}
     public Message(byte[] receiver,byte[] message){
         this.message=message;
         this.receiver=receiver;
-        this.receicedTimestamp=new Date();
+        this.receivedTimestamp=new Date();
     }
     public byte[] getMessage(){
         return message;
@@ -29,7 +38,7 @@ public class Message {
         return receiver;
     }
     public Date getReceivedTimestamp(){
-        return this.receicedTimestamp;
+        return this.receivedTimestamp;
     }
 
     public void setId(int id) {
@@ -45,8 +54,8 @@ public class Message {
         this.receiver = receiver;
     }
 
-    public void setReceicedTimestamp(Date receicedTimestamp) {
-        this.receicedTimestamp = receicedTimestamp;
+    public void setReceivedTimestamp(Date receicedTimestamp) {
+        this.receivedTimestamp = receicedTimestamp;
     }
     public String toString(){
         return new Key(receiver).toString()+" -> "+new String(message);

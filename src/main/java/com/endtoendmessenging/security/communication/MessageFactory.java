@@ -158,9 +158,53 @@ public class MessageFactory {
         LoggerFactory.getLogger("MessageFactory").info("Message Types : " + typeToClass.toString());
         return typeToClass;
     }
-    public static Message createMessageInstance(int type) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+    private static Message createMessageInstance(int type) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
         Class messageClass = messageTypes.get(type);
         return (Message) messageClass.getConstructor().newInstance(new Object[]{});
+    }
+    public static Message createMessageInstance(byte[] message)  {
+        try{
+        MessageSerializationProtocol.EncryptedLayer decryptedMessage = MessageSerializationProtocol.EncryptedLayer.parseFrom(message);
+        Message newMessage = createMessageInstance(decryptedMessage.getType());
+
+
+        if (decryptedMessage.hasReceiver()) {
+            newMessage.receiver = decryptedMessage.getReceiver().toByteArray();
+        }
+        if(decryptedMessage.hasSender()){
+            newMessage.sender=decryptedMessage.getSender().toByteArray();
+        }
+
+        newMessage.readBytes(decryptedMessage.getVersion(), decryptedMessage.getMessageByte().toByteArray());
+        return newMessage;
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvalidProtocolBufferException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    public static byte[] toUnencryptedBytes(Message message){
+
+        MessageType messageType = message.getClass().getAnnotation(MessageType.class);
+
+        MessageSerializationProtocol.EncryptedLayer.Builder builder1 = MessageSerializationProtocol.EncryptedLayer.newBuilder()
+                .setType(messageType.type())
+                .setVersion(messageType.version())
+                .setMessageByte(ByteString.copyFrom(message.toBytes()));
+        if (message.receiver != null) {
+            builder1.setReceiver(ByteString.copyFrom(message.receiver));
+        }
+        if(message.sender!=null){
+            builder1.setSender(ByteString.copyFrom(message.sender));
+        }
+        return builder1.build().toByteArray();
     }
 
 

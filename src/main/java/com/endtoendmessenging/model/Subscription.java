@@ -1,9 +1,6 @@
 package com.endtoendmessenging.model;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.util.Date;
 
 @Entity
@@ -11,7 +8,11 @@ public class Subscription {
 
     @Id
     byte[] subscriber;
+
+    @Column
     Date subscriptionStart;
+
+    @Column
     Date subscriptionExpiry;
 
     public byte[] getSubscriber() {

@@ -2,6 +2,7 @@ package com.endtoendmessenging.security.communication.message;
 
 import com.soriole.kademlia.core.store.Key;
 
+@MessageType(version = 1,type = 10)
 public class SubscriptionMessage extends Message {
     public Key nodeToSubscribe;
     @Override

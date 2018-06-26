@@ -21,6 +21,7 @@ message TransparentLayer {
 
 // this will be incorporated in the Outer Layer
 message EncryptedLayer {
+    optional bytes sender=4;
     // receiver info if required.
     optional bytes receiver = 3;
 

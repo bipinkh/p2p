@@ -1,6 +1,5 @@
 package com.endtoendmessenging.security.communication.listener;
 
-import com.endtoendmessenging.repository.MessageRepositoryImplementaion;
 import com.endtoendmessenging.repository.SubscriptionRepository;
 import com.endtoendmessenging.security.communication.message.Message;
 import com.soriole.kademlia.service.KademliaService;
@@ -13,8 +12,7 @@ public class clientMessageListener extends Listener {
     @Autowired
     SubscriptionRepository repository;
 
-    @Autowired
-    MessageRepositoryImplementaion messageRepo;
+
 
     @Autowired
     KademliaService kadService;
