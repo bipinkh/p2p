@@ -122,7 +122,7 @@ public class ClientApiController {
     public ResponseEntity getMessage(
             @RequestParam(value = "clientid") String clientId,
             @RequestParam(value = "count", required = false, defaultValue = " 10") int count,
-            @RequestParam(value = "laterThan", required = false, defaultValue = "") String laterThan) {
+            @RequestParam(value = "laterthan", required = false, defaultValue = "") String laterThan) {
         if (this.subscriptionRepository.findById(new Key(clientId).toBytes()).isPresent()) {
             return ResponseEntity.ok(MessageCollecitonBean.fromMessageCollection(messageRepository.findByReceiver(new Key(clientId).toBytes())));
         } else {
@@ -142,6 +142,5 @@ public class ClientApiController {
     public String info() {
         return "test";
     }
-
 
 }

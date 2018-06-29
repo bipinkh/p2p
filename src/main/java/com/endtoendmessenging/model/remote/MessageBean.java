@@ -18,7 +18,7 @@ public final class MessageBean {
         return new String(message.getMessage());
     }
 
-    public Date getReceivedDate() {
+    public Date getSentDate() {
         return message.getReceivedTimestamp();
     }
 
@@ -26,7 +26,7 @@ public final class MessageBean {
         message.setMessage(text.getBytes());
     }
 
-    public void setReceivedDate(Date date) {
+    public void setSentDate(Date date) {
         message.setReceivedTimestamp(date);
     }
 

@@ -60,9 +60,11 @@ public class ContactBucket {
         if (buckets[distance].contains(new Contact(info))) {
             Contact contact = null;
             for (Contact c : buckets[distance]) {
-                if (c.equals(info))
-                    contact=c;
+                if (c.equals(info)) {
+                    contact = c;
                     break;
+                }
+
             }
             assert(contact!=null);
             contactsByLastSeen.remove(contact);
@@ -86,9 +88,10 @@ public class ContactBucket {
         if (buckets[distance].contains(new Contact(info))) {
             Contact contact = null;
             for (Contact c : buckets[distance]) {
-                if (c.equals(info))
-                    contact=c;
-                break;
+                if (c.equals(info)) {
+                    contact = c;
+                    break;
+                }
             }
             assert(contact!=null);
             contact.lastActive = new Date();
@@ -215,7 +218,7 @@ public class ContactBucket {
         return ret;
     }
     synchronized public Contact getMostInactiveContact(){
-        return this.contactsByLastSeen.last();
+        return this.contactsByLastSeen.first();
     }
     @Override
     public String toString(){

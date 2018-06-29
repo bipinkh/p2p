@@ -242,12 +242,24 @@ public class KademliaDHT implements KadProtocol<byte[]> {
             return new Date().getTime() - start.getTime();
 
         } catch (TimeoutException e) {
-            e.printStackTrace();
+            LOGGER.warn("Time out while pinging :" + node.getKey() + " -> " + node.getLanAddress().toString());
         } catch (ServerShutdownException e) {
             e.printStackTrace();
         }
         // we can remove this node from the DHT.
-        bucket.removeNode(node.getKey());
+        return -1;
+    }
+
+    public long ping(Key key) {
+        try {
+            NodeInfo node = this.findNode(key);
+            if (node == null) {
+                return -1;
+            }
+            return ping(node);
+        } catch (ServerShutdownException e) {
+            e.printStackTrace();
+        }
         return -1;
     }
 
@@ -258,12 +270,7 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         NodeInfo info = bucket.getNode(key);
 
         if (info != null) {
-            // if our bucket already has the nodeinfo, ping the node.
-            if (ping(info) >= 0) {
-                return info;
-            }
-            // if the ping was unsuccessful, well, we will say that we don't have the contact.
-            return null;
+            return info;
         }
         // if we don't have the contact, we need to use the find closest nodes algorithm.
         SortedSet<NodeInfo> closestNodes = findClosestNodes(key);
@@ -355,25 +362,26 @@ public class KademliaDHT implements KadProtocol<byte[]> {
     }
 
     private void validateRoutingTable() {
-        LOGGER.debug(" ValidateRoutingTable");
-        while (true) {
-            try {
-                Contact c = this.bucket.getMostInactiveContact();
 
-                long currentTime = System.currentTimeMillis();
-                if (c != null) {
-                    if ((currentTime - c.getLastActive().getTime()) > this.defaultNodeExpirationTime) {
-                        if (this.ping(c.getNodeInfo()) < 0) {
-                            LOGGER.info("Peer " + c.getNodeInfo().getKey() + ": has gone offline.");
-                            this.bucket.removeNode(c.getNodeInfo().getKey());
-                            continue;
+        outerWhile:
+        while (true) try {
+            Contact c = this.bucket.getMostInactiveContact();
+            long currentTime = System.currentTimeMillis();
+            if (c != null) {
+                if ((currentTime - c.getLastActive().getTime()) > this.defaultNodeExpirationTime) {
+                    for (int i = 0; i < 4; i++) {
+                        if (this.ping(c.getNodeInfo()) >= 0) {
+                            continue outerWhile;
                         }
                     }
+                    LOGGER.info("Peer " + c.getNodeInfo().getKey() + ": has gone offline.");
+                    this.bucket.removeNode(c.getNodeInfo().getKey());
+                    continue;
                 }
-                break;
-            } catch (NoSuchElementException e) {
-                return;
             }
+            return;
+        } catch (NoSuchElementException e) {
+            return;
         }
 
     }
@@ -423,9 +431,9 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         Thread udpPunctureThread = new Thread(new Runnable() {
             @Override
             public void run() {
-                while(true){
+                while (true) {
                     Collection<NodeInfo> routingTable = getRoutingTable();
-                    if(routingTable.size()>0){
+                    if (routingTable.size() > 0) {
                         Random rnd = new Random();
                         int i = rnd.nextInt(routingTable.size());
                         ping(routingTable.toArray(new NodeInfo[0])[i]);
@@ -453,6 +461,27 @@ public class KademliaDHT implements KadProtocol<byte[]> {
         return false;
     }
 
+    public NodeInfo findMyInfo(NodeInfo nodeInfo) throws TimeoutException {
+        try {
+            EchoReplyMessage message = (EchoReplyMessage) server.startQuery(nodeInfo, new EchoMessage());
+            if (message == null) {
+                return null;
+            }
+            return message.nodeInfo;
+        } catch (ServerShutdownException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public NodeInfo findMyInfo(Key key) throws TimeoutException {
+        try {
+            return findMyInfo(findNode(key));
+        } catch (ServerShutdownException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
 
 

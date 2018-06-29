@@ -9,6 +9,7 @@ import com.soriole.kademlia.service.KademliaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.Inet4Address;
@@ -17,6 +18,7 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
+import java.util.concurrent.TimeoutException;
 
 @RestController
 @RequestMapping(value = "/api/kademlia/v1")
@@ -171,5 +173,17 @@ public class KademliaApiController {
             return "Udp Puncture stopped";
         }
         return "Udp Puncture was not running";
+    }
+    @GetMapping("/myInfo/{peerid}")
+    public ResponseEntity getMyip(@PathVariable("nodeid")String nodeid){
+        try {
+            NodeInfo info=kademliaService.getDHT().findMyInfo(new Key(nodeid));
+            if(info!=null){
+                return ResponseEntity.ok(NodeInfoBean.fromNodeInfo(info));
+            }
+        } catch (TimeoutException e) {
+            return ResponseEntity.ok("Peer didn't reply");
+        }
+        return ResponseEntity.ok("Unknown error");
     }
 }

@@ -30,8 +30,11 @@ import java.util.Arrays;
  *      <li>check for the change of network address of the sender and inform it to upper layer.</li>
  *  </ol>
  */
+
 abstract class MessageServer extends DataGramServer {
+
     static private Logger logger = LoggerFactory.getLogger(MessageServer.class);
+
     protected ContactBucket bucket;
 
     protected MessageServer(DatagramSocket socket, ContactBucket bucket) {
@@ -120,6 +123,7 @@ abstract class MessageServer extends DataGramServer {
                     // if we cannot put it into the bucket we need to notify for furthur action
                     onNewNodeFound(message.mSrcNodeInfo.clone());
                 }
+                return message;
             }
             // if the contact is already in the kademlia bucket, check if the address is same.
             // if the address is changed, we might or might need to do some extra tasks.
@@ -127,8 +131,10 @@ abstract class MessageServer extends DataGramServer {
             else if (!message.mSrcNodeInfo.getLanAddress().equals(bucketNode.getLanAddress())) {
                 onNetworkAddressChange(senderKey, (InetSocketAddress) packet.getSocketAddress());
             }
+            bucket.putNode(message.mSrcNodeInfo);
         }
         return message;
+
     }
 
     protected abstract void onNetworkAddressChange(Key senderKey, InetSocketAddress newSocketAddress);
@@ -136,6 +142,5 @@ abstract class MessageServer extends DataGramServer {
     protected abstract void onNewNodeFound(NodeInfo info);
 
     protected abstract void onNewForwardMessage(Message message,NodeInfo destination);
-
 
 }

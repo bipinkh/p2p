@@ -67,9 +67,13 @@ public class KademliaService {
         kademliaDHT=new KademliaExtendedDHT(localKey,storageService,configBuilder.build());
         kademliaDHT.start();
         if (!localKeyValue.equals(bootstrapKeyValue)) {
-            if(!kademliaDHT.join(new NodeInfo(new Key(bootstrapKeyValue), new InetSocketAddress(bootstrapIp, bootstrapPort)))){
-                throw new RuntimeException("Cannot Connect with Bootstrap node");
+            for(int i=0;i<4;i++) {
+                if (kademliaDHT.join(new NodeInfo(new Key(bootstrapKeyValue), new InetSocketAddress(bootstrapIp, bootstrapPort)))) {
+                    return;
+                }
+
             }
+            throw new RuntimeException("Cannot Connect with Bootstrap node");
         }
 
     }

@@ -135,7 +135,6 @@ public class KademliaMessageServer extends SessionServer {
                 msgReceiver.onReceive(super.query(message));
                 return;
             } catch (TimeoutException e) {
-                e.printStackTrace();
             } catch (ServerShutdownException e) {
                 e.printStackTrace();
             }

@@ -51,7 +51,7 @@ public class KademliaDHTTest {
             dhts.add(createDHTinstance(new Key(hex(i + 1))));
             dhts.get(i).server.start();
         }
-
+        Thread.sleep(1000);
         join();
 
     }
