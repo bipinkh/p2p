@@ -1,4 +1,4 @@
-package com.soriole.kademlia.core.network.server.udp;
+package com.soriole.kademlia.network.server;
 
 import com.google.protobuf.ByteString;
 
@@ -8,18 +8,20 @@ import com.soriole.kademlia.core.messages.MessageType;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
+import com.soriole.kademlia.network.KademliaNetworkMessageProtocol;
+import org.apache.tomcat.util.collections.SynchronizedQueue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.util.Arrays;
 
 /**
- * KademliaServer is able to read the datagram received in a socket and convert them into
+ * KademliaMessageServer is able to read the datagram received in a socket and convert them into
  * appropriate message format so that the upper layer can handle it.
  * The tasks performed by this server are:
  *  <ol>
@@ -41,7 +43,7 @@ abstract class MessageServer extends DataGramServer {
     }
 
     protected void sendMessage(Message message, NodeInfo receiver, long sessionId) throws IOException {
-        if (bucket.getLocalNode().equals(receiver)) {
+        if(bucket.getLocalNode().equals(receiver)){
             logger.warn("Coding Error ! The server is trying to send message to itself!");
             return;
         }
@@ -69,16 +71,15 @@ abstract class MessageServer extends DataGramServer {
         sendMessage(message, message.mDestNodeInfo, message.sessionId);
 
     }
-
-    protected Message receiveMessage() throws IOException {
+    protected Message receiveMessage() throws  IOException {
         DatagramPacket packet = receivePacket();
         byte[] data = Arrays.copyOf(packet.getData(), packet.getLength());
         KademliaNetworkMessageProtocol.Message messageProto = KademliaNetworkMessageProtocol.Message.parseFrom(data);
         Message message = null;
         try {
-            message = MessageFactory.createUninitialized(messageProto.getType());
-        } catch (Exception e) {
-            logger.warn("MessageFactory.createMessageInstance failed for type " + String.valueOf(messageProto.getType()));
+            message = MessageFactory.createMessage(messageProto.getType());
+        } catch (Exception e){
+            logger.warn("MessageFactory.createMessageInstance failed for type "+String.valueOf(messageProto.getType()));
         }
 
         // get The sender's identifier key
@@ -96,8 +97,8 @@ abstract class MessageServer extends DataGramServer {
             message.mDestNodeInfo = bucket.getNode(new Key(messageProto.getReceiver().toByteArray()));
 
             // message not for us and we don't know receiver's address.
-            if (message.mDestNodeInfo != bucket.getLocalNode()) {
-                onNewForwardMessage(message, message.mDestNodeInfo);
+            if (message.mDestNodeInfo!=bucket.getLocalNode()) {
+                onNewForwardMessage(message,message.mDestNodeInfo);
             }
 
         }
@@ -112,7 +113,7 @@ abstract class MessageServer extends DataGramServer {
         }
 
         // sessionId=1 is the session value used by the clients to access kademlia features.
-        if (message.sessionId != 1) {
+        if(message.sessionId!=1) {
             // Check if the sender is already is in out kademlia bucket.
             NodeInfo bucketNode = bucket.getNode(senderKey);
             // if this node is not present in the bucket
@@ -140,6 +141,6 @@ abstract class MessageServer extends DataGramServer {
 
     protected abstract void onNewNodeFound(NodeInfo info);
 
-    protected abstract void onNewForwardMessage(Message message, NodeInfo destination);
+    protected abstract void onNewForwardMessage(Message message,NodeInfo destination);
 
 }

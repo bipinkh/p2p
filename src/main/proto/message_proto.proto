@@ -1,0 +1,46 @@
+syntax = "proto2";
+package message;
+
+option java_package = "com.endtoendmessenging.security.communication";
+option java_outer_classname = "MessageSerializationProtocol";
+
+
+message TransparentLayer {
+    // messageEncoding version
+    required bytes encryptedData = 2;
+
+    // if the encryption was done by adding random index value to the key, it is visible.
+    required int32 index = 3;
+
+    // if the sender's id is required for decryption, it is visible outeside.
+    required bytes sender = 4;
+
+    required bytes authenticationCode = 6;
+
+}
+
+// this will be incorporated in the Outer Layer
+message EncryptedLayer {
+    optional bytes sender=4;
+    // receiver info if required.
+    optional bytes receiver = 3;
+
+    // type and version information.
+    optional int32 type = 1;
+    required int32 version = 7;
+
+    // message and checksum
+    optional bytes messageByte = 5;
+
+}
+
+// the message used to create a new session key.
+message KeyShareMessage{
+    required bytes key=3;
+    required bytes nounce=4;
+}
+
+message ForwardMessage{
+    required bytes messageData=3;
+    optional bytes receiverNode=4;
+}
