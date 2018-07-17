@@ -45,27 +45,31 @@ kademliaDHT provides access to the dht features. The components required to make
 **Setting up Kademlia DHT**
 
 ```java
-// create a configuration builder class and set the parameters as per requirement
-KademliaConfig.Builder configBuilder=KademliaConfig.newBuilder();
-configBuilder.setKadeliaProtocolPort(9999);
-configBuilder.setK(3);
-KademliaConfig config=configBuilder.build();
-
-// create identifier key for your DHT node keys are binary values and serilized using base58 encoding
-Key key=new Key("ab1245")
-
-// create a contact bucket Instance
-ContactBucket bucket=new ContactBucket(key,config);
-
-// storage for the DHT use the inmemory Store for testing
-InMemoryByteStore dhtStore = new InMemoryByteStore(config);
-
-//create a message dispacher instance. tcp and udp dispachers are available.
-MessageDispacher dispacher=new com.soriole.kademlia.core.network.server.udp.KademliaServer(bucket,dhtStore,config)
-
-// create kademliaExtendedDHT Instance using the autowired storageService
-KademliaDHT dht=new KademliaDHT(bucket,disacher,dhtStore,config)
-
-// additionally if you want to connect this kademlia Dht with another Dht node
-dht.join(new InetSocketAddress("localhost",__kademlia_port_of_another_instance));
+public class Test{
+    public static void main(String args[]){
+        // create a configuration builder class and set the parameters as per requirement
+        KademliaConfig.Builder configBuilder=KademliaConfig.newBuilder();
+        configBuilder.setKadeliaProtocolPort(9999);
+        configBuilder.setK(3);
+        KademliaConfig config=configBuilder.build();
+        
+        // create identifier key for your DHT node keys are binary values and serilized using base58 encoding
+        Key key=new Key("ab1245");
+        
+        // create a contact bucket Instance
+        ContactBucket bucket=new ContactBucket(key,config);
+        
+        // storage for the DHT use the inmemory Store for testing
+        InMemoryByteStore dhtStore = new InMemoryByteStore(config);
+        
+        //create a message dispacher instance. tcp and udp dispachers are available.
+        MessageDispacher dispacher=new UdpServer(bucket,dhtStore,config);
+        
+        // create kademliaExtendedDHT Instance using the autowired storageService
+        KademliaDHT dht=new KademliaDHT(bucket,disacher,dhtStore,config);
+        
+        // additionally if you want to connect this kademlia Dht with another Dht node
+        dht.join(new InetSocketAddress("localhost",__kademlia_port_of_another_instance));
+    }
+}
 ```

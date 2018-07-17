@@ -6,7 +6,6 @@ buildscript {
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:2.0.3.RELEASE")
         classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.6'
-
     }
 }
 
@@ -14,16 +13,8 @@ apply plugin: 'java'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'com.google.protobuf'
 
-sourceSets {
-    main {
-        proto {
-        }
-    }
-}
-
 bootJar {
-    baseName = 'p2p-kademlia'
-    version = '2.0.0'
+    baseName = 'kademlia'
     mainClassName = 'com.soriole.kademlia.KademliaApplication'
 }
 repositories {
@@ -60,8 +51,18 @@ protobuf {
         artifact = 'com.google.protobuf:protoc:3.0.0'
     }
 }
-clean{
-    println "Trying to delete : ${rootDir}/biuld/"
-    delete("${rootDir}/build/")
 
+apply plugin: 'maven'
+// best way to set group ID
+group = 'com.soriole'
+install {
+    repositories.mavenInstaller {
+        // only necessary if artifact ID diverges from project name
+        // the latter defaults to project directory name and can be
+        // configured in settings.gradle
+        pom.artifactId = 'p2p-kademlia'
+        pom.version = "2.0.0"
+        // shouldn't be needed as this is the default anyway
+        pom.packaging = 'jar'
+    }
 }
