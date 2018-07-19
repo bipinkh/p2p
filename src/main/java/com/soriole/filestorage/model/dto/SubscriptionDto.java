@@ -1,9 +1,9 @@
-package com.filestorage.model.dto;
+package com.soriole.filestorage.model.dto;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.filestorage.model.db.Pricing;
-import com.filestorage.model.db.Subscription;
+import com.soriole.filestorage.model.db.Pricing;
+import com.soriole.filestorage.model.db.Subscription;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

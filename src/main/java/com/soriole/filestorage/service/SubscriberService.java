@@ -1,21 +1,21 @@
-package com.filestorage.service;
+package com.soriole.filestorage.service;
 
 
-import com.filestorage.exception.ResourceNotFoundException;
-import com.filestorage.model.db.Subscription;
-import com.filestorage.model.db.User;
-import com.filestorage.model.db.UserSubscription;
-import com.filestorage.model.dto.SubscribeRequest;
-import com.filestorage.model.dto.UserSubscriptionDto;
-import com.filestorage.repository.SubscriptionRepo;
-import com.filestorage.repository.UserRepo;
-import com.filestorage.repository.UserSubscriptionRepo;
+import com.soriole.filestorage.exception.ResourceNotFoundException;
+import com.soriole.filestorage.model.db.Subscription;
+import com.soriole.filestorage.model.db.User;
+import com.soriole.filestorage.model.db.UserSubscription;
+import com.soriole.filestorage.model.dto.SubscribeRequest;
+import com.soriole.filestorage.model.dto.UserSubscriptionDto;
+import com.soriole.filestorage.repository.SubscriptionRepo;
+import com.soriole.filestorage.repository.UserRepo;
+import com.soriole.filestorage.repository.UserSubscriptionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static com.filestorage.service.SubscriptionService.ACTIVE_SUBSCRIPTION_PACKAGE;
+import static com.soriole.filestorage.service.SubscriptionService.ACTIVE_SUBSCRIPTION_PACKAGE;
 
 
 /**

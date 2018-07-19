@@ -1,6 +1,6 @@
-package com.filestorage.repository;
+package com.soriole.filestorage.repository;
 
-import com.filestorage.model.db.File;
+import com.soriole.filestorage.model.db.File;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 /**

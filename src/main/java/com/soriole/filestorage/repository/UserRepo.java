@@ -1,6 +1,6 @@
-package com.filestorage.repository;
+package com.soriole.filestorage.repository;
 
-import com.filestorage.model.db.User;
+import com.soriole.filestorage.model.db.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

@@ -1,9 +1,9 @@
-package com.filestorage.service;
+package com.soriole.filestorage.service;
 
 import com.filestorage.model.dto.FileUploadRequest;
-import com.filestorage.repository.FileRepo;
-import com.filestorage.repository.UserRepo;
-import com.filestorage.model.db.User;
+import com.soriole.filestorage.repository.FileRepo;
+import com.soriole.filestorage.repository.UserRepo;
+import com.soriole.filestorage.model.db.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -64,7 +64,7 @@ public class FileService {
         }
 
             //create file
-            com.filestorage.model.db.File file = com.filestorage.model.db.File.fromFileUploadRequest(uploadRequest);
+            com.soriole.filestorage.model.db.File file = com.soriole.filestorage.model.db.File.fromFileUploadRequest(uploadRequest);
             fileRepo.save(file);
             //bidirectional mapping
             user.addFile(file);

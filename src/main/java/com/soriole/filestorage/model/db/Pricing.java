@@ -1,7 +1,7 @@
-package com.filestorage.model.db;
+package com.soriole.filestorage.model.db;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.filestorage.model.dto.PricingDto;
+import com.soriole.filestorage.model.dto.PricingDto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -1,4 +1,4 @@
-package com.filestorage.model.db;
+package com.soriole.filestorage.model.db;
 
 
 

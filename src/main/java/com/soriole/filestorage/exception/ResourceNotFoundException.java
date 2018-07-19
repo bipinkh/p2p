@@ -1,4 +1,4 @@
-package com.filestorage.exception;
+package com.soriole.filestorage.exception;
 
 /**
  * @author bipin khatiwada

@@ -1,9 +1,9 @@
-package com.filestorage.api;
+package com.soriole.filestorage.api;
 
-import com.filestorage.model.dto.SubscribeRequest;
-import com.filestorage.model.dto.UserSubscriptionDto;
-import com.filestorage.service.FileService;
-import com.filestorage.service.SubscriberService;
+import com.soriole.filestorage.model.dto.SubscribeRequest;
+import com.soriole.filestorage.model.dto.UserSubscriptionDto;
+import com.soriole.filestorage.service.FileService;
+import com.soriole.filestorage.service.SubscriberService;
 import com.filestorage.model.dto.FileUploadRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

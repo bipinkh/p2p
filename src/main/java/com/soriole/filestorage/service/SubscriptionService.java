@@ -1,12 +1,12 @@
-package com.filestorage.service;
+package com.soriole.filestorage.service;
 
-import com.filestorage.exception.ResourceNotFoundException;
-import com.filestorage.model.db.Pricing;
-import com.filestorage.model.db.Subscription;
-import com.filestorage.model.dto.PricingDto;
-import com.filestorage.model.dto.SubscriptionDto;
-import com.filestorage.repository.PricingRepo;
-import com.filestorage.repository.SubscriptionRepo;
+import com.soriole.filestorage.exception.ResourceNotFoundException;
+import com.soriole.filestorage.model.db.Pricing;
+import com.soriole.filestorage.model.db.Subscription;
+import com.soriole.filestorage.model.dto.PricingDto;
+import com.soriole.filestorage.model.dto.SubscriptionDto;
+import com.soriole.filestorage.repository.PricingRepo;
+import com.soriole.filestorage.repository.SubscriptionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
