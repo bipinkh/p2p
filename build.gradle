@@ -40,7 +40,7 @@ dependencies {
     compile group: 'commons-collections', name: 'commons-collections', version: '3.2.1'
     compile group: 'org.mapdb', name: 'mapdb', version: '3.0.5'
     runtime group: 'com.h2database', name: 'h2', version: '1.4.197'
-
+    compileOnly 'org.projectlombok:lombok:1.18.0'
 
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.1.RELEASE'
 }
