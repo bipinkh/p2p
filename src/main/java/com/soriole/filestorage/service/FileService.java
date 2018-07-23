@@ -1,6 +1,6 @@
 package com.soriole.filestorage.service;
 
-import com.filestorage.model.dto.FileUploadRequest;
+import com.soriole.filestorage.model.dto.FileUploadRequest;
 import com.soriole.filestorage.repository.FileRepo;
 import com.soriole.filestorage.repository.UserRepo;
 import com.soriole.filestorage.model.db.User;
@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.swing.text.html.Option;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -37,10 +39,19 @@ public class FileService {
             user = new User(null, uploadRequest.getUserKey(), 1, null, new ArrayList<>());
             userRepo.saveAndFlush(user);
         }else {
+            // todo: remove this user declaration and throw exception of USER_NOT_FOUND
             user = usr.get();
         }
-        // todo: remove this user declaration and throw exception of USER_NOT_FOUND
-        // todo: handle duplicate file
+
+        //todo: check subscription of user.
+
+        // check for duplicate file
+        Optional<com.soriole.filestorage.model.db.File> preExistingFile = fileRepo.findByFileHashAndUser(
+                uploadRequest.getFiles()[0].getName(),user);
+        if (preExistingFile.isPresent()){
+            //todo: throw exception FILE_ALREADY_EXISTS
+            System.out.println("File Already Exists, so cannot be stored again !");
+        }
 
 
         MultipartFile[] files = uploadRequest.getFiles();
@@ -74,6 +85,19 @@ public class FileService {
 
         return true;
 
+    }
+
+    // return all files of an user for given userId
+    public List<com.soriole.filestorage.model.db.File> getAllFilesOfUser(Long userId){
+        return userRepo.getOne(userId).getFile();
+    }
+    // return all files of user for given userKey
+    public List<com.soriole.filestorage.model.db.File> getAllFilesOfUser(String userKey){
+        Optional<User> user = userRepo.findByUserKey(userKey);
+        if (user.isPresent()){
+            return getAllFilesOfUser(user.get().getId());
+        }
+        return null;
     }
 
 }

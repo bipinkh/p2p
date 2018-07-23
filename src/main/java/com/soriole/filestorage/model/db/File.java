@@ -3,7 +3,7 @@ package com.soriole.filestorage.model.db;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.filestorage.model.dto.FileUploadRequest;
+import com.soriole.filestorage.model.dto.FileUploadRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

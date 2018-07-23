@@ -1,10 +1,10 @@
 package com.soriole.filestorage.api;
 
+import com.soriole.filestorage.model.dto.FileUploadRequest;
 import com.soriole.filestorage.model.dto.SubscribeRequest;
 import com.soriole.filestorage.model.dto.UserSubscriptionDto;
 import com.soriole.filestorage.service.FileService;
 import com.soriole.filestorage.service.SubscriberService;
-import com.filestorage.model.dto.FileUploadRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 

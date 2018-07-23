@@ -1,4 +1,4 @@
-package com.filestorage.model.dto;
+package com.soriole.filestorage.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
