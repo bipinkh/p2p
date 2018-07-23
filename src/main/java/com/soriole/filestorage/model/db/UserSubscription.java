@@ -53,14 +53,8 @@ public class UserSubscription {
 
         UserSubscription subscription = new UserSubscription();
 
-        Calendar calendar = Calendar.getInstance();
-        Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
-        calendar.setTime(currentTimeStamp);
-        calendar.add(Calendar.MONTH, request.getMonth());
-        Timestamp endingTimestamp = new Timestamp(calendar.getTime().getTime());
-
-        subscription.setStartedDate(currentTimeStamp);
-        subscription.setEndingDate(endingTimestamp);
+        subscription.setStartedDate(null);
+        subscription.setEndingDate(null);
         subscription.setActiveStatus(false);            // subscription is active only after renewing.
         subscription.setSizeConsumed(0);
         subscription.setBandwidthConsumed(0);

@@ -2,17 +2,22 @@ package com.soriole.filestorage.service;
 
 
 import com.soriole.filestorage.exception.ResourceNotFoundException;
+import com.soriole.filestorage.model.db.Renewals;
 import com.soriole.filestorage.model.db.Subscription;
 import com.soriole.filestorage.model.db.User;
 import com.soriole.filestorage.model.db.UserSubscription;
 import com.soriole.filestorage.model.dto.SubscribeRequest;
+import com.soriole.filestorage.model.dto.SubscriptionActivationRequest;
 import com.soriole.filestorage.model.dto.UserSubscriptionDto;
+import com.soriole.filestorage.repository.RenewalsRepo;
 import com.soriole.filestorage.repository.SubscriptionRepo;
 import com.soriole.filestorage.repository.UserRepo;
 import com.soriole.filestorage.repository.UserSubscriptionRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Optional;
 
 import static com.soriole.filestorage.service.SubscriptionService.ACTIVE_SUBSCRIPTION_PACKAGE;
@@ -33,6 +38,8 @@ public class SubscriberService {
     UserSubscriptionRepo userSubscriptionRepo;
     @Autowired
     SubscriptionRepo subscriptionRepo;
+    @Autowired
+    RenewalsRepo renewalsRepo;
 
     // subscribe user
 
@@ -91,4 +98,42 @@ public class SubscriberService {
     }
 
 
+    public UserSubscriptionDto activateSubscription(SubscriptionActivationRequest activationRequest) {
+        // make sure that user is registered
+        Optional<User> usr = userRepo.findByUserKey(activationRequest.getUserKey());
+        if (!usr.isPresent())
+            throw new ResourceNotFoundException("cannot find the user subscription for given id");
+
+        //todo: verify the payment slip
+
+        UserSubscription subscription = usr.get().getUserSubscription();
+        subscription.setActiveStatus(true);
+
+        // calculate start and ending time
+        Calendar calendar = Calendar.getInstance();
+        Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
+        calendar.setTime(currentTimeStamp);
+        calendar.add(Calendar.MONTH, subscription.getSubscriptionPackage().getTimeSpan());
+        Timestamp endingTimestamp = new Timestamp(calendar.getTime().getTime());
+
+        // create renewal record
+        Renewals renewals = new Renewals();
+        renewals.setStatus(1);
+        renewals.setRenewedTime(currentTimeStamp);
+        renewals.setTransactionHash(activationRequest.getPayment_slip());
+        renewalsRepo.save(renewals);
+
+        //set renewal bidirectionally
+        subscription.addRenewal(renewals);
+
+        // set time
+        subscription.setStartedDate(currentTimeStamp);
+        subscription.setEndingDate(endingTimestamp);
+
+        // update changes
+        userSubscriptionRepo.save(subscription);
+
+        //return updated subscription
+        return UserSubscriptionDto.fromUserSubscription(subscription);
+    }
 }

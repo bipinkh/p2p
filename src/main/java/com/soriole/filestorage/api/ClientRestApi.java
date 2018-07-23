@@ -2,6 +2,7 @@ package com.soriole.filestorage.api;
 
 import com.soriole.filestorage.model.dto.FileUploadRequest;
 import com.soriole.filestorage.model.dto.SubscribeRequest;
+import com.soriole.filestorage.model.dto.SubscriptionActivationRequest;
 import com.soriole.filestorage.model.dto.UserSubscriptionDto;
 import com.soriole.filestorage.service.FileService;
 import com.soriole.filestorage.service.SubscriberService;
@@ -37,6 +38,11 @@ public class ClientRestApi {
     @PostMapping("/subscribe/new")
     public UserSubscriptionDto newSubscription(@RequestBody SubscribeRequest subscribeRequest){
         return subscriberService.createSubscription(subscribeRequest);
+    }
+
+    @PostMapping("/subscribe/activate")
+    public UserSubscriptionDto newSubscription(@RequestBody SubscriptionActivationRequest activationRequest){
+        return subscriberService.activateSubscription(activationRequest);
     }
 
     @GetMapping("/subscribe/view")
