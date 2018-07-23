@@ -21,7 +21,7 @@ import java.util.Optional;
  */
 @Service
 public class FileService {
-    private static String BASE_FOLDER = "src//main//resources//files//";
+    private static String BASE_FOLDER = "files//";
 
     @Autowired
     FileRepo fileRepo;
@@ -51,12 +51,15 @@ public class FileService {
         try{
 
             File directory = new File(String.valueOf(BASE_FOLDER+user.getUserKey()));
-            if(!directory.exists())
+            if(!directory.exists()){
+                System.out.println("folder not found creating new folder for user");
                 directory.mkdir();
-
+            }
+            System.out.println("writing file");
             byte[] bytes = files[0].getBytes();
             Path path = Paths.get(filePath);
             Files.write(path, bytes);
+            System.out.println("file saved");
 
         }catch (Exception e){
             System.out.println("Error: "+e.getMessage());
