@@ -32,7 +32,7 @@ public class UserSubscription {
     User user;
 
     @ManyToOne
-    @JsonManagedReference
+    @JsonBackReference
     Subscription subscriptionPackage;
 
     private boolean activeStatus;
@@ -41,7 +41,7 @@ public class UserSubscription {
 
     private Timestamp endingDate;
 
-    @OneToMany
+    @OneToMany(mappedBy = "userSubscription", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<Renewals> renewals;
 
@@ -82,7 +82,4 @@ public class UserSubscription {
                 ", bandwidthConsumed=" + bandwidthConsumed +
                 '}';
     }
-
-
-
 }

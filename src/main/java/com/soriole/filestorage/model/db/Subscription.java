@@ -41,7 +41,7 @@ public class Subscription {
     List<Pricing> pricings;
 
     @OneToMany(mappedBy = "subscriptionPackage", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
+    @JsonManagedReference
     List<UserSubscription> subscribers;
 
 

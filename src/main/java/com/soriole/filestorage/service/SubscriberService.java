@@ -70,8 +70,8 @@ public class SubscriberService {
         subscription = userSubscriptionRepo.save(subscription);
 
         // add bidirectional mapping
-        user.addUserSubscription(subscription);
-        subscriptionPack.addSubscriber(subscription);
+        user.addUserSubscription(subscription);         // user and usersubscription
+        subscriptionPack.addSubscriber(subscription);   // usersubscription and subscription
 
         return UserSubscriptionDto.fromUserSubscription( userSubscriptionRepo.saveAndFlush(subscription) );
 
@@ -100,13 +100,16 @@ public class SubscriberService {
 
     public UserSubscriptionDto activateSubscription(SubscriptionActivationRequest activationRequest) {
         // make sure that user is registered
-        Optional<User> usr = userRepo.findByUserKey(activationRequest.getUserKey());
-        if (!usr.isPresent())
+        Optional<User> user = userRepo.findByUserKey(activationRequest.getUserKey());
+        if (!user.isPresent())
             throw new ResourceNotFoundException("cannot find the user subscription for given id");
+
+        // get reference of user since we are updating it.
+        User usr = userRepo.getOne(user.get().getId());
 
         //todo: verify the payment slip
 
-        UserSubscription subscription = usr.get().getUserSubscription();
+        UserSubscription subscription = usr.getUserSubscription();
         subscription.setActiveStatus(true);
 
         // calculate start and ending time
@@ -131,7 +134,7 @@ public class SubscriberService {
         subscription.setEndingDate(endingTimestamp);
 
         // update changes
-        userSubscriptionRepo.save(subscription);
+//        userSubscriptionRepo.save(subscription);
 
         //return updated subscription
         return UserSubscriptionDto.fromUserSubscription(subscription);

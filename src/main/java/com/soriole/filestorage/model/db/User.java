@@ -32,11 +32,11 @@ public class User {
 
     private int userStatus;     //active, deactive, blocked
 
-    @OneToOne
-    @JsonBackReference
+    @OneToOne(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     UserSubscription userSubscription;
 
-    @OneToMany
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     List<File> file = new ArrayList<File>();
 
@@ -49,7 +49,6 @@ public class User {
                 ", userSubscription=" + userSubscription +
                 '}';
     }
-
 
     public void addUserSubscription(UserSubscription subscription){
         this.setUserSubscription(subscription);
