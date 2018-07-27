@@ -1,6 +1,7 @@
 package com.soriole.dfsnode.model.db;
 
 import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -14,6 +15,7 @@ import java.sql.Timestamp;
  * created on : 26 Jul 2018
  */
 @Entity
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class Transaction {
@@ -32,8 +34,8 @@ public class Transaction {
 
     private String fileHash;
 
-    private Integer tokenAmountReceived;
+    private String tokenAmountReceived;
 
-    private Integer tokenAmountDeducted;
+    private String tokenAmountDeducted;
 
 }

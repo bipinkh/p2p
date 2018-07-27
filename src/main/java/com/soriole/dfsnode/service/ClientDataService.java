@@ -1,9 +1,9 @@
 package com.soriole.dfsnode.service;
 
 import com.soriole.dfsnode.exceptions.CustomException;
-import com.soriole.dfsnode.exceptions.UserNotFound;
 import com.soriole.dfsnode.model.db.ClientData;
 import com.soriole.dfsnode.model.dto.DownloadRequest;
+import com.soriole.dfsnode.model.dto.ClientDataDto;
 import com.soriole.dfsnode.model.dto.RenewRequest;
 import com.soriole.dfsnode.model.dto.UploadRequest;
 import com.soriole.dfsnode.repository.ClientDataRepository;
@@ -11,7 +11,6 @@ import com.soriole.dfsnode.repository.ClientRepository;
 import com.soriole.dfsnode.model.db.Client;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,6 +44,7 @@ public class ClientDataService {
     ClientRepository clientRepository;
     @Autowired
     ClientDataRepository clientDataRepository;
+    @Autowired TransactionService transactionService;
 
 
 
@@ -99,6 +99,9 @@ public class ClientDataService {
         clientData = clientDataRepository.getOne( clientDataRepository.save(clientData).getId() );
         client.addClientData(clientData);   // bidirectional mapping
 
+        // add transaction
+        transactionService.txnFileUpload(client.getClientPublicKey(), clientData.getFileHash());
+
         //todo: agree storage in contract
 
         return true;
@@ -134,12 +137,14 @@ public class ClientDataService {
             throw new CustomException("user has already exceeded the timelimit. you might want to renew or delete file");
 
         // increase current download and total download count
-        clientData.setCurrentDownloadCount(clientData.getCurrentDownloadCount() + 1 );
+        clientData.setCurrentDownloadCount(clientData.getCurrentDownloadCount() + 1);
         clientData.setTotalDownloadCount(clientData.getTotalDownloadCount() + 1 );
+        clientDataRepository.save(clientData);
 
-        System.out.println(clientData.getFileDataPath());
-        File file = new File(clientData.getFileDataPath());
-        return file;
+        // add transaction
+        transactionService.txnFileDownload(optClient.get().getClientPublicKey(), clientData.getFileHash());
+
+        return new File(clientData.getFileDataPath());
     }
 
     public boolean renewFile(RenewRequest request) {
@@ -177,14 +182,14 @@ public class ClientDataService {
     }
 
     //todo: use this using dto response
-    public String getStatusOfFile(String fileHash){
+    public ClientDataDto getStatusOfFile(String fileHash){
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(fileHash);
         if (!optData.isPresent()){
             System.out.println("user do not have the file with given hash");
             throw new CustomException("user do not have the file with given hash in this node");
         }else{
-           return optData.get().getRenewedDate().toString();
+           return ClientDataDto.fromClientData(optData.get());
         }
     }
 
