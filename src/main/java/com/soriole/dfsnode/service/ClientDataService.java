@@ -4,6 +4,7 @@ import com.soriole.dfsnode.exceptions.CustomException;
 import com.soriole.dfsnode.exceptions.UserNotFound;
 import com.soriole.dfsnode.model.db.ClientData;
 import com.soriole.dfsnode.model.dto.DownloadRequest;
+import com.soriole.dfsnode.model.dto.RenewRequest;
 import com.soriole.dfsnode.model.dto.UploadRequest;
 import com.soriole.dfsnode.repository.ClientDataRepository;
 import com.soriole.dfsnode.repository.ClientRepository;
@@ -98,6 +99,8 @@ public class ClientDataService {
         clientData = clientDataRepository.getOne( clientDataRepository.save(clientData).getId() );
         client.addClientData(clientData);   // bidirectional mapping
 
+        //todo: agree storage in contract
+
         return true;
     }
 
@@ -137,6 +140,52 @@ public class ClientDataService {
         System.out.println(clientData.getFileDataPath());
         File file = new File(clientData.getFileDataPath());
         return file;
+    }
+
+    public boolean renewFile(RenewRequest request) {
+        ClientData clientData;
+
+        // check if user exists
+        Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
+        if (!optClient.isPresent()){
+            System.out.println("user do not have file");
+            throw new CustomException("user do not have any files currently in this node");
+        }
+
+        // check if file exists
+        Optional<ClientData> optData = clientDataRepository.findByFileHash(request.getFilehash());
+        if (!optData.isPresent()){
+            System.out.println("user do not have the file with given hash");
+            throw new CustomException("user do not have the file with given hash in this node");
+        }else{
+            clientData = clientDataRepository.getOne(optData.get().getId());
+        }
+
+        // update renew date
+        Calendar calendar = Calendar.getInstance();
+        Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
+        calendar.add(Calendar.MONTH, SUBSCRIPTON_LENGTH_MONTH);
+        Timestamp endingTimestamp = new Timestamp(calendar.getTime().getTime());
+        System.out.println(currentTimeStamp.toString());
+        clientData.setRenewedDate(currentTimeStamp);
+        clientData.setEndingDate(endingTimestamp);
+        clientData.setCurrentDownloadCount(0);
+        clientDataRepository.save(clientData);
+
+        // todo: agree in contract
+        return true;
+    }
+
+    //todo: use this using dto response
+    public String getStatusOfFile(String fileHash){
+        // check if file exists
+        Optional<ClientData> optData = clientDataRepository.findByFileHash(fileHash);
+        if (!optData.isPresent()){
+            System.out.println("user do not have the file with given hash");
+            throw new CustomException("user do not have the file with given hash in this node");
+        }else{
+           return optData.get().getRenewedDate().toString();
+        }
     }
 
 
