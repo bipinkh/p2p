@@ -27,3 +27,4 @@
 /.gradle/out/
 out/
 *.db*
+files/
