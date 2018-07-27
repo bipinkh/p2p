@@ -33,9 +33,9 @@ public class ClientData {
 
     private Timestamp endingDate;
 
-    private Integer currentDownloadCount;   // download count in this last renewed period
+    private Integer currentDownloadCount = 0;   // download count in this last renewed period
 
-    private Integer totalDownloadCount;
+    private Integer totalDownloadCount = 0;
 
 
 }

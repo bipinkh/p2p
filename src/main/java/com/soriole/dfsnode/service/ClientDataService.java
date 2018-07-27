@@ -1,6 +1,9 @@
 package com.soriole.dfsnode.service;
 
+import com.soriole.dfsnode.exceptions.CustomException;
+import com.soriole.dfsnode.exceptions.UserNotFound;
 import com.soriole.dfsnode.model.db.ClientData;
+import com.soriole.dfsnode.model.dto.DownloadRequest;
 import com.soriole.dfsnode.model.dto.UploadRequest;
 import com.soriole.dfsnode.repository.ClientDataRepository;
 import com.soriole.dfsnode.repository.ClientRepository;
@@ -32,6 +35,8 @@ public class ClientDataService {
     private int SUBSCRIPTON_LENGTH_MONTH;
     @Value("${dfs.params.uploadFolder}")
     private String BASE_FOLDER;
+    @Value("${dfs.params.totalDownloads}")
+    private int TOTAL_DOWNLOAD_COUNT;
 
     @Autowired
     ClientService clientService;
@@ -57,7 +62,7 @@ public class ClientDataService {
             client.setClientPublicKey(request.getUserKey());
             client = clientRepository.getOne(clientRepository.save(client).getId());   // get reference
         }else{
-            client = optClient.get();
+            client = clientRepository.getOne( optClient.get().getId() );
         }
 
         // create directory if not already created.
@@ -94,6 +99,44 @@ public class ClientDataService {
         client.addClientData(clientData);   // bidirectional mapping
 
         return true;
+    }
+
+    public File getFile(DownloadRequest request){
+        ClientData clientData;
+
+        // check if user exists
+        Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
+        if (!optClient.isPresent()){
+            System.out.println("user do not have file");
+            throw new CustomException("user do not have any files currently in this node");
+        }
+
+        // check if file exists
+        Optional<ClientData> optData = clientDataRepository.findByFileHash(request.getFilehash());
+        if (!optData.isPresent()){
+            System.out.println("user do not have the file with given hash");
+            throw new CustomException("user do not have the file with given hash in this node");
+        }else{
+            clientData = clientDataRepository.getOne(optData.get().getId());
+        }
+
+        // check if the number of downloads is exceeded
+        if (clientData.getCurrentDownloadCount() > TOTAL_DOWNLOAD_COUNT)
+            throw  new CustomException("user has exceeded download number for this subscription");
+
+        //check if time has expired
+        Calendar calendar = Calendar.getInstance();
+        Timestamp today = new Timestamp(calendar.getTime().getTime());
+        if (today.after(clientData.getEndingDate()))
+            throw new CustomException("user has already exceeded the timelimit. you might want to renew or delete file");
+
+        // increase current download and total download count
+        clientData.setCurrentDownloadCount(clientData.getCurrentDownloadCount() + 1 );
+        clientData.setTotalDownloadCount(clientData.getTotalDownloadCount() + 1 );
+
+        System.out.println(clientData.getFileDataPath());
+        File file = new File(clientData.getFileDataPath());
+        return file;
     }
 
 
