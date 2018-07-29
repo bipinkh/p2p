@@ -7,7 +7,7 @@ package com.soriole.dfsnode.model.db;
 public enum TransactionTypeEnum {
     UPLOAD,
     DOWNLOAD,
-    LISTREQUEST,
+    RENEW,
     TOKENRECEIVED,
     TOKENSENT,
     TOKENBOUGHT,
