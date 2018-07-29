@@ -16,9 +16,6 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 public class ClientDataDto {
 
-    @Value("${dfs.params.totalDownloads}")
-    private static int total_download;
-
     @JsonProperty("file_hash")
     private String fileHash;
     @JsonProperty("renewed_date")
@@ -38,7 +35,7 @@ public class ClientDataDto {
                 clientData.getRenewedDate(),
                 clientData.getEndingDate(),
                 clientData.getCurrentDownloadCount(),
-                total_download - clientData.getCurrentDownloadCount(),
+                ClientData.max_download_for_one_renewal - clientData.getCurrentDownloadCount(),
                 clientData.getTotalDownloadCount());
     }
 }

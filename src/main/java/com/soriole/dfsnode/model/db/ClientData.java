@@ -3,6 +3,7 @@ package com.soriole.dfsnode.model.db;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -16,6 +17,10 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ClientData {
+
+
+    @Value("${dfs.params.totalDownloads}")
+    public static int max_download_for_one_renewal;
 
     @Id
     @GeneratedValue

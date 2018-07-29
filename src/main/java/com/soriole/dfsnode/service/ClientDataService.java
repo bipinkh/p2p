@@ -19,7 +19,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -67,8 +69,8 @@ public class ClientDataService {
         }
 
         // create directory if not already created.
-        MultipartFile[] files = request.getFiles();
-        String fileName = files[0].getOriginalFilename();
+        MultipartFile file = request.getFile();
+        String fileName = file.getOriginalFilename();
         String folderPath = BASE_FOLDER.concat(client.getClientPublicKey().concat("//"));
         String savedFilePath = folderPath.concat(fileName).concat("//");
         try{
@@ -80,7 +82,7 @@ public class ClientDataService {
 
             // save file
             System.out.println("writing file");
-            byte[] bytes = files[0].getBytes();
+            byte[] bytes = file.getBytes();
             Path path = Paths.get(savedFilePath);
             Files.write(path, bytes);
             System.out.println("file saved");
@@ -90,9 +92,11 @@ public class ClientDataService {
             return false;
         }
 
+        //todo: agree on fileHash
+
         // create new client data
         ClientData clientData = new ClientData();
-        clientData.setFileHash(getFileHash(files[0]));
+        clientData.setFileHash(getFileHash(file));
         clientData.setRenewedDate(currentTimeStamp);
         clientData.setEndingDate(endingTimestamp);
         clientData.setFileDataPath(savedFilePath);
@@ -177,6 +181,9 @@ public class ClientDataService {
         clientData.setCurrentDownloadCount(0);
         clientDataRepository.save(clientData);
 
+        // add transaction
+        transactionService.txnSubsRenew(optClient.get().getClientPublicKey(), clientData.getFileHash());
+
         // todo: agree in contract
         return true;
     }
@@ -193,10 +200,26 @@ public class ClientDataService {
         }
     }
 
+    public List<ClientDataDto> listAllFiles(String userKey) {
+        // check if user exists
+        Optional<Client> optClient = clientRepository.findByClientPublicKey(userKey);
+        if (!optClient.isPresent()){
+            System.out.println("user do not have file");
+            throw new CustomException("user do not have any files currently in this node");
+        }
+
+        List<ClientData> allclientdata = clientDataRepository.findAllByClient(optClient.get());
+        List<ClientDataDto> returns = new ArrayList<>();
+        for (ClientData d : allclientdata)
+            returns.add(ClientDataDto.fromClientData(d));
+        return returns;
+    }
+
 
     //todo: implement this
     private String getFileHash(MultipartFile file) {
         return "dummyFileHash";
     }
+
 
 }

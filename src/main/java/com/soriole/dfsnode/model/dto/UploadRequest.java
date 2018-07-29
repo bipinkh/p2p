@@ -12,7 +12,8 @@ import org.springframework.web.multipart.MultipartFile;
 @AllArgsConstructor
 public class UploadRequest {
 
-    MultipartFile[] files;
+    MultipartFile file;
     String userKey;
+    String fileHash;
 
 }

@@ -65,6 +65,26 @@ public class TransactionService {
         return TransactionDto.fromTransaction(transaction);
     }
 
+    public TransactionDto txnSubsRenew(String clientPublicKey, String fileHash) {
+        Calendar calendar = Calendar.getInstance();
+        Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
+        Transaction transaction =
+                transactionRepository.save(
+                        new Transaction(
+                                null,
+                                currentTimeStamp,
+                                TransactionTypeEnum.RENEW,
+                                clientPublicKey,
+                                not_applicable,
+                                fileHash,
+                                not_applicable,
+                                not_applicable
+                        )
+                );
+        System.out.println("new transaction : "+transaction.toString());
+        return TransactionDto.fromTransaction(transaction);
+    }
+
     public List<TransactionDto> getAllTransactions(String clientPublicKey){
         List<TransactionDto> dtos = new ArrayList<>();
         List<Transaction> txns = transactionRepository.findAllBySenderOrReceiver(clientPublicKey, clientPublicKey);

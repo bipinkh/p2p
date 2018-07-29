@@ -4,6 +4,7 @@ import com.soriole.dfsnode.model.db.Client;
 import com.soriole.dfsnode.model.db.ClientData;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -13,4 +14,5 @@ import java.util.Optional;
 public interface ClientDataRepository extends JpaRepository<ClientData, Long> {
 
     Optional<ClientData> findByFileHash(String hash);
+    List<ClientData> findAllByClient(Client client);
 }
