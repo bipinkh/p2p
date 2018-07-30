@@ -1,9 +1,9 @@
 package com.soriole.kademlia.core;
 
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.store.TimeStampedData;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 
 import java.net.InetSocketAddress;
 import java.util.Collection;

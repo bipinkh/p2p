@@ -1,11 +1,11 @@
 package com.soriole.kademlia.core;
 
 import com.soriole.kademlia.core.messages.*;
+import com.soriole.kademlia.core.network.MessageDispacher;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.network.server.udp.UdpServer;
 import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.util.NodeInfoComparatorByDistance;
-import com.soriole.kademlia.core.network.MessageDispacher;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

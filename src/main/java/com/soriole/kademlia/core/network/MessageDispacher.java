@@ -2,9 +2,8 @@ package com.soriole.kademlia.core.network;
 
 import com.soriole.kademlia.core.NodeInteractionListener;
 import com.soriole.kademlia.core.messages.Message;
-import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.network.receivers.MessageReceiver;
+import com.soriole.kademlia.core.store.NodeInfo;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

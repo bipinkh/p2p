@@ -2,7 +2,6 @@ package com.soriole.dfsnode.model.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.soriole.dfsnode.model.db.Transaction;
-import com.soriole.dfsnode.model.db.TransactionTypeEnum;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

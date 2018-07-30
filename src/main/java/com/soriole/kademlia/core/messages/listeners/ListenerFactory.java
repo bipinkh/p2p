@@ -1,13 +1,16 @@
 package com.soriole.kademlia.core.messages.listeners;
 
 import com.soriole.kademlia.core.messages.Message;
+import com.soriole.kademlia.core.network.MessageDispacher;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.TimestampedStore;
-import com.soriole.kademlia.core.network.MessageDispacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Listener Factory is responsible to create a new instance of MessageListener.

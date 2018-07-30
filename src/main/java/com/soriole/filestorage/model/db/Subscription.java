@@ -1,6 +1,5 @@
 package com.soriole.filestorage.model.db;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.soriole.filestorage.model.dto.SubscriptionDto;
 import lombok.AllArgsConstructor;

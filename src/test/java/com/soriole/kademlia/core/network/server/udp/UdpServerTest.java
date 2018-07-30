@@ -3,11 +3,11 @@ package com.soriole.kademlia.core.network.server.udp;
 import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NodeLookupMessage;
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.InMemoryByteStore;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
 import java.util.Random;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 
 /**

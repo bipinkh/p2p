@@ -2,7 +2,6 @@ package com.soriole.kademlia.model.remote;
 
 import com.soriole.kademlia.core.store.NodeInfo;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public final class NodeInfoCollectionBean {

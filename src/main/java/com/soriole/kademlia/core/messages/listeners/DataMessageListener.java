@@ -3,7 +3,6 @@ package com.soriole.kademlia.core.messages.listeners;
 import com.soriole.kademlia.core.messages.DataMessage;
 import com.soriole.kademlia.core.messages.DataReplyMessage;
 import com.soriole.kademlia.core.messages.Message;
-import com.soriole.kademlia.core.messages.NodeListMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

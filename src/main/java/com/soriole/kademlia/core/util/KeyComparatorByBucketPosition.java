@@ -3,8 +3,6 @@ package com.soriole.kademlia.core.util;// the classes below might be required fo
 import com.soriole.kademlia.core.store.Key;
 
 import java.io.Serializable;
-import java.math.BigInteger;
-import java.util.BitSet;
 import java.util.Comparator;
 
 /**

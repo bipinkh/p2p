@@ -2,9 +2,9 @@ package com.soriole.kademlia.core.messages;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
+import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;

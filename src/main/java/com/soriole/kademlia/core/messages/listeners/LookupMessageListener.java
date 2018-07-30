@@ -1,8 +1,8 @@
 package com.soriole.kademlia.core.messages.listeners;
 
 import com.soriole.kademlia.core.messages.DataMessage;
-import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.LookupMessage;
+import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NodeListMessage;
 import com.soriole.kademlia.core.store.TimeStampedData;
 

@@ -1,14 +1,13 @@
 package com.soriole.kademlia.core.network.server.udp;
 
 import com.google.protobuf.ByteString;
-
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.MessageFactory;
 import com.soriole.kademlia.core.messages.MessageType;
+import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

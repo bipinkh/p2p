@@ -1,7 +1,9 @@
 package com.soriole.kademlia.service;
 
-import com.soriole.kademlia.core.*;
-import com.soriole.kademlia.core.store.*;
+import com.soriole.kademlia.core.KademliaConfig;
+import com.soriole.kademlia.core.KademliaExtendedDHT;
+import com.soriole.kademlia.core.store.Key;
+import com.soriole.kademlia.core.store.NodeInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

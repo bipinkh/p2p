@@ -5,9 +5,7 @@ import com.soriole.kademlia.core.messages.NodeListMessage;
 import com.soriole.kademlia.core.messages.NodeLookupMessage;
 import com.soriole.kademlia.core.store.NodeInfo;
 
-import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 @ListenerType(messageClass = NodeLookupMessage.class)
 public class NodeLookupMessageListener extends MessageListener {

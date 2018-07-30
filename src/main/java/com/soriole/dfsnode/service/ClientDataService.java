@@ -2,26 +2,24 @@ package com.soriole.dfsnode.service;
 
 import com.google.common.hash.Hashing;
 import com.soriole.dfsnode.exceptions.CustomException;
+import com.soriole.dfsnode.model.db.Client;
 import com.soriole.dfsnode.model.db.ClientData;
-import com.soriole.dfsnode.model.dto.DownloadRequest;
 import com.soriole.dfsnode.model.dto.ClientDataDto;
+import com.soriole.dfsnode.model.dto.DownloadRequest;
 import com.soriole.dfsnode.model.dto.RenewRequest;
 import com.soriole.dfsnode.model.dto.UploadRequest;
 import com.soriole.dfsnode.repository.ClientDataRepository;
 import com.soriole.dfsnode.repository.ClientRepository;
-import com.soriole.dfsnode.model.db.Client;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
-import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -79,8 +77,8 @@ public class ClientDataService {
         }else{
             client = clientRepository.getOne( optClient.get().getId() );
 
-            if ( clientDataRepository.findByFileHashAndClient(request.getFileHash(), client).isPresent() )
-                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
+//            if ( clientDataRepository.findByFileHashAndClient(request.getFileHash(), client).isPresent() )
+//                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
         }
 
         //agree on generated file hash with the user sent file hash
@@ -326,7 +324,9 @@ public class ClientDataService {
         File convFile = new File(file.getOriginalFilename());
         try (FileOutputStream fos = new FileOutputStream(convFile)) {
             fos.write(file.getBytes());
-            return com.google.common.io.Files.hash(convFile,Hashing.sha256()).toString();
+            String hash = com.google.common.io.Files.hash(convFile,Hashing.sha256()).toString();
+            convFile.delete();
+            return hash;
         }catch (Exception e){
             return null;
         }

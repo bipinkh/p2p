@@ -4,13 +4,13 @@ import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.NodeInteractionListener;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.listeners.ListenerFactory;
-import com.soriole.kademlia.core.store.ContactBucket;
-import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.store.TimestampedStore;
 import com.soriole.kademlia.core.network.MessageDispacher;
 import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.network.receivers.BulkMessageReceiver;
 import com.soriole.kademlia.core.network.receivers.MessageReceiver;
+import com.soriole.kademlia.core.store.ContactBucket;
+import com.soriole.kademlia.core.store.NodeInfo;
+import com.soriole.kademlia.core.store.TimestampedStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

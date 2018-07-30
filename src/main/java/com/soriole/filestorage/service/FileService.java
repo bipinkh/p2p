@@ -1,14 +1,13 @@
 package com.soriole.filestorage.service;
 
+import com.soriole.filestorage.model.db.User;
 import com.soriole.filestorage.model.dto.FileUploadRequest;
 import com.soriole.filestorage.repository.FileRepo;
 import com.soriole.filestorage.repository.UserRepo;
-import com.soriole.filestorage.model.db.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.swing.text.html.Option;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;

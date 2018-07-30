@@ -1,13 +1,11 @@
 package com.soriole.kademlia.core.store;
 
 import com.soriole.kademlia.core.KademliaConfig;
-import org.apache.commons.lang.StringUtils;
 import org.junit.Test;
 
-import javax.xml.soap.Node;
-import java.math.BigInteger;
-import java.util.*;
-import java.util.stream.IntStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 

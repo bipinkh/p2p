@@ -3,11 +3,11 @@ package com.soriole.kademlia.core.network.server.udp;
 import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.NonKademliaMessage;
+import com.soriole.kademlia.core.network.ExtendedMessageDispacher;
+import com.soriole.kademlia.core.network.receivers.ByteReceiver;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.core.store.TimestampedStore;
-import com.soriole.kademlia.core.network.receivers.ByteReceiver;
-import com.soriole.kademlia.core.network.ExtendedMessageDispacher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

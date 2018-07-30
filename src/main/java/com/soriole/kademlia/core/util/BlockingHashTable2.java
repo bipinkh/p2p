@@ -1,6 +1,7 @@
 package com.soriole.kademlia.core.util;
 
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.locks.ReentrantLock;
 

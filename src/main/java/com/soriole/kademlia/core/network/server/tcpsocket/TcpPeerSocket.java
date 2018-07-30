@@ -4,11 +4,11 @@ import com.soriole.kademlia.core.messages.AddressExchangeMessage;
 import com.soriole.kademlia.core.messages.Message;
 import com.soriole.kademlia.core.messages.MessageFactory;
 import com.soriole.kademlia.core.messages.PongMessage;
+import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
+import com.soriole.kademlia.core.network.receivers.MessageReceiver;
 import com.soriole.kademlia.core.store.ContactBucket;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
-import com.soriole.kademlia.core.network.KademliaNetworkMessageProtocol;
-import com.soriole.kademlia.core.network.receivers.MessageReceiver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

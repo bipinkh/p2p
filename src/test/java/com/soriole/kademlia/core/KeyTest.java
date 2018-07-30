@@ -5,7 +5,6 @@ import org.junit.Test;
 
 import java.math.BigInteger;
 import java.util.Arrays;
-import java.util.BitSet;
 
 import static org.junit.Assert.assertEquals;
 

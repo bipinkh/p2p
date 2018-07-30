@@ -1,9 +1,9 @@
 package com.soriole.kademlia.core;
 
-import com.soriole.kademlia.core.network.server.tcpsocket.TcpServer;
-import com.soriole.kademlia.core.store.*;
 import com.soriole.kademlia.core.network.MessageDispacher;
 import com.soriole.kademlia.core.network.ServerShutdownException;
+import com.soriole.kademlia.core.network.server.tcpsocket.TcpServer;
+import com.soriole.kademlia.core.store.*;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,7 +14,8 @@ import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 /**
  * Test diffreent kademlia rpcs by creating  a kademlia network containg nDHTS no. of nodes.
