@@ -201,4 +201,24 @@ public class KademliaApiController {
         long commitedVirtualMemorySize = os.getCommittedVirtualMemorySize();
         return ResponseEntity.ok("Not yet implemented");
     }
+
+
+    @GetMapping(value = "/available_nodes/{key}")
+    public NodeInfoCollectionBean availableNodes(@PathVariable("key") String paramKey) throws ServerShutdownException {
+        LOGGER.info("availableNodes({})", paramKey);
+        Key key = new Key(paramKey);
+
+        Collection<NodeInfo> nodeInfos = null;
+        nodeInfos = kademliaService.getDHT().findClosestNodes(key);
+
+        NodeInfoBean[] parsedNodeInfos = new NodeInfoBean[nodeInfos.size()];
+        int idx = 0;
+        for (NodeInfo nodeInfo : nodeInfos) {
+            parsedNodeInfos[idx] = NodeInfoBean.fromNodeInfo(nodeInfo);
+            ++idx;
+        }
+        NodeInfoCollectionBean bean = new NodeInfoCollectionBean();
+        bean.setNodeInfo(parsedNodeInfos);
+        return bean;
+    }
 }

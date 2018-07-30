@@ -3,6 +3,7 @@ package com.soriole.dfsnode.controller;
 import com.soriole.dfsnode.model.dto.*;
 import com.soriole.dfsnode.service.ClientDataService;
 import com.soriole.dfsnode.service.TransactionService;
+import com.soriole.kademlia.model.remote.NodeInfoCollectionBean;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
