@@ -5,6 +5,8 @@ import com.soriole.dfsnode.service.ClientDataService;
 import com.soriole.dfsnode.service.TransactionService;
 import com.soriole.kademlia.controller.KademliaApiController;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,15 +29,14 @@ public class ClientApiController {
     /** -- Other Apis -- **/
 
     @GetMapping("/ping")
-    public String ping(){
-        return "Server Running";
+    public ResponseEntity<String> ping(){
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Server Running");
     }
-
 
     /** -- File Service Apis -- **/
 
     @PostMapping("/file/upload")
-    public boolean uploadFile(UploadRequest request){
+    public ResponseEntity<Boolean> uploadFile(UploadRequest request){
         return clientDataService.uploadFile(request);
     }
 

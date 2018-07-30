@@ -14,6 +14,9 @@ import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.commons.CommonsMultipartFile;
@@ -59,7 +62,7 @@ public class ClientDataService {
      * @return true if the file upload request is processed
      * */
 
-    public boolean uploadFile(UploadRequest request){
+    public ResponseEntity<Boolean> uploadFile(UploadRequest request){
         Client client;
 
         Calendar calendar = Calendar.getInstance();
@@ -75,7 +78,27 @@ public class ClientDataService {
             client = clientRepository.getOne(clientRepository.save(client).getId());   // get reference
         }else{
             client = clientRepository.getOne( optClient.get().getId() );
+
+            if ( clientDataRepository.findByFileHashAndClient(request.getFileHash(), client).isPresent() )
+                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
         }
+
+        //agree on generated file hash with the user sent file hash
+        String fileHash = null;
+        try {
+            fileHash = getFileHash(request.getFile());
+            if (fileHash ==null)
+                return ResponseEntity.badRequest().header("message","cannot calculate file hash").body(false);
+            if (! fileHash.equals(request.getFileHash())){
+                return ResponseEntity.badRequest().header("message","hash of file doesn't match").body(false);
+            }
+        } catch (IOException e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("message", "There is error in server processing")
+                    .body(false);
+        }
+
 
         // create directory if not already created.
         MultipartFile file = request.getFile();
@@ -98,23 +121,12 @@ public class ClientDataService {
 
         }catch (Exception e){
             System.out.println("Error: "+e.getMessage());
-            return false;
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .header("message", "There is server error in processing with your request")
+                    .body(false);
         }
 
-        //agree on generated file hash with the user sent file hash
-        String fileHash = null;
-        try {
-            fileHash = getFileHash(file);
-            if (fileHash ==null)
-                throw new CustomException("cannot calculate hash of file");
-            if (! fileHash.equals(request.getFileHash())){
-                throw new CustomException("hash doesn't match with the client sent hash !");
-            }else{
-                System.out.println("verified file hash !");
-            }
-        } catch (IOException e) {
-            return false;
-        }
 
         // create new client data
         ClientData clientData = new ClientData();
@@ -130,7 +142,10 @@ public class ClientDataService {
 
         //todo CONTRACT: verify the file storage request on contract
 
-        return true;
+        return ResponseEntity
+                .ok()
+                .header("message", "Your File is stored. Verify it in contract !")
+                .body(true);
     }
 
 
@@ -274,13 +289,12 @@ public class ClientDataService {
 
     private static String getFileHash(MultipartFile file) throws IOException {
         File convFile = new File(file.getOriginalFilename());
-        if (convFile.createNewFile() ){
-            try (FileOutputStream fos = new FileOutputStream(convFile)) {
-                fos.write(file.getBytes());
-                return com.google.common.io.Files.hash(convFile,Hashing.sha256()).toString();
-            }
+        try (FileOutputStream fos = new FileOutputStream(convFile)) {
+            fos.write(file.getBytes());
+            return com.google.common.io.Files.hash(convFile,Hashing.sha256()).toString();
+        }catch (Exception e){
+            return null;
         }
-        return null;
     }
 
     private static String getFileHash(File file) throws IOException {
