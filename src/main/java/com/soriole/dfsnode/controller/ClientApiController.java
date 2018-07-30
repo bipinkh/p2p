@@ -41,17 +41,17 @@ public class ClientApiController {
     }
 
     @PostMapping("/file/download")
-    public File uploadFile(DownloadRequest request){
+    public ResponseEntity<File> downloadFile(DownloadRequest request){
         return clientDataService.getFile(request);
     }
 
     @PostMapping("/file/renew")
-    public boolean renewFile(RenewRequest request){
+    public ResponseEntity<Boolean> renewFile(RenewRequest request){
         return clientDataService.renewFile(request);
     }
 
     @GetMapping("/file/getstatus")
-    public ClientDataDto renewFile(@RequestParam("file_hash") String fileHash){
+    public ResponseEntity<ClientDataDto> renewFile(@RequestParam("file_hash") String fileHash){
         return clientDataService.getStatusOfFile(fileHash);
     }
 

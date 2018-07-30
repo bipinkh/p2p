@@ -155,34 +155,47 @@ public class ClientDataService {
      * @return requested file
      * */
 
-    public File getFile(DownloadRequest request){
+    public ResponseEntity<File> getFile(DownloadRequest request){
         ClientData clientData;
 
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
         if (!optClient.isPresent()){
             System.out.println("user do not have file");
-            throw new CustomException("user do not have any files currently in this node");
+            return ResponseEntity
+                    .badRequest()
+                    .header("message", "You do not have any files in this system !")
+                    .body(null);
         }
 
         // check if file exists
-        Optional<ClientData> optData = clientDataRepository.findByFileHash(request.getFilehash());
+        Optional<ClientData> optData = clientDataRepository.findByFileHashAndClient(request.getFilehash(),optClient.get());
         if (!optData.isPresent()){
-            System.out.println("user do not have the file with given hash");
-            throw new CustomException("user do not have the file with given hash in this node");
+            return ResponseEntity
+                    .badRequest()
+                    .header("message", "File with given hash is not found in your record !")
+                    .body(null);
         }else{
             clientData = clientDataRepository.getOne(optData.get().getId());
         }
 
         // check if the number of downloads is exceeded
         if (clientData.getCurrentDownloadCount() > TOTAL_DOWNLOAD_COUNT)
-            throw  new CustomException("user has exceeded download number for this subscription");
+            return ResponseEntity
+                    .badRequest()
+                    .header("message", "You have already reached your max download count. " +
+                            "Please renew it if you again want to continue the service.")
+                    .body(null);
 
         //check if time has expired
         Calendar calendar = Calendar.getInstance();
         Timestamp today = new Timestamp(calendar.getTime().getTime());
         if (today.after(clientData.getEndingDate()))
-            throw new CustomException("user has already exceeded the timelimit. you might want to renew or delete file");
+            return ResponseEntity
+                    .badRequest()
+                    .header("message", "You have already reached your max time limit of storage. " +
+                            "Please renew it if you again want to continue the service.")
+                    .body(null);
 
         // increase current download and total download count
         clientData.setCurrentDownloadCount(clientData.getCurrentDownloadCount() + 1);
@@ -193,7 +206,12 @@ public class ClientDataService {
         transactionService.txnFileDownload(optClient.get().getClientPublicKey(), clientData.getFileHash());
 
         // return file
-        return new File(clientData.getFileDataPath());
+        return ResponseEntity
+                .ok()
+                .header("message", "File downloaded. Remaining downloads : "
+                        + (10 - clientData.getCurrentDownloadCount()))
+                //todo: remove hardcoding here
+                .body(new File(clientData.getFileDataPath()));
     }
 
 
@@ -204,21 +222,28 @@ public class ClientDataService {
      * @return true is the renew process is successful
      * */
 
-    public boolean renewFile(RenewRequest request) {
+    public ResponseEntity<Boolean> renewFile(RenewRequest request) {
         ClientData clientData;
 
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
         if (!optClient.isPresent()){
             System.out.println("user do not have file");
-            throw new CustomException("user do not have any files currently in this node");
+            System.out.println("user do not have file");
+            return ResponseEntity
+                    .badRequest()
+                    .header("message", "You do not have any files in this system !")
+                    .body(null);
         }
 
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(request.getFilehash());
         if (!optData.isPresent()){
             System.out.println("user do not have the file with given hash");
-            throw new CustomException("user do not have the file with given hash in this node");
+            return ResponseEntity
+                    .badRequest()
+                    .header("message", "File with given hash is not found in your record !")
+                    .body(null);
         }else{
             clientData = clientDataRepository.getOne(optData.get().getId());
         }
@@ -238,7 +263,14 @@ public class ClientDataService {
         transactionService.txnSubsRenew(optClient.get().getClientPublicKey(), clientData.getFileHash());
 
         // todo CONTRACT: agree to the update request in contract
-        return true;
+
+
+        return ResponseEntity
+                .ok()
+                .header("message", "File Renewed. Remaining downloads : "
+                        + (10 - clientData.getCurrentDownloadCount()))
+                //todo: remove hardcoding here
+                .body(true);
     }
 
 
@@ -248,14 +280,17 @@ public class ClientDataService {
      * @return ClientDataDto object that contains the file details
      * */
 
-    public ClientDataDto getStatusOfFile(String fileHash){
+    public ResponseEntity<ClientDataDto> getStatusOfFile(String fileHash){
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(fileHash);
         if (!optData.isPresent()){
             System.out.println("user do not have the file with given hash");
-            throw new CustomException("user do not have the file with given hash in this node");
+            return ResponseEntity
+                    .ok()
+                    .header("message","File with given hash is not found in your record !")
+                    .body(null);
         }else{
-           return ClientDataDto.fromClientData(optData.get());
+            return ResponseEntity.ok(ClientDataDto.fromClientData(optData.get()));
         }
     }
 
