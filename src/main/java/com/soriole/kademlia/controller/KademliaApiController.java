@@ -1,10 +1,10 @@
 package com.soriole.kademlia.controller;
 
+import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.core.store.Key;
 import com.soriole.kademlia.core.store.NodeInfo;
 import com.soriole.kademlia.model.remote.NodeInfoBean;
 import com.soriole.kademlia.model.remote.NodeInfoCollectionBean;
-import com.soriole.kademlia.core.network.ServerShutdownException;
 import com.soriole.kademlia.service.KademliaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +13,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.management.ManagementFactory;
-import java.net.Inet4Address;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.Collection;
 import java.util.NoSuchElementException;
 import java.util.concurrent.TimeoutException;

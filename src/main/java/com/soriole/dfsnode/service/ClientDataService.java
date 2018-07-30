@@ -1,5 +1,6 @@
 package com.soriole.dfsnode.service;
 
+import com.google.common.hash.Hashing;
 import com.soriole.dfsnode.exceptions.CustomException;
 import com.soriole.dfsnode.model.db.ClientData;
 import com.soriole.dfsnode.model.dto.DownloadRequest;
@@ -9,12 +10,15 @@ import com.soriole.dfsnode.model.dto.UploadRequest;
 import com.soriole.dfsnode.repository.ClientDataRepository;
 import com.soriole.dfsnode.repository.ClientRepository;
 import com.soriole.dfsnode.model.db.Client;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
+import org.apache.tomcat.util.http.fileupload.disk.DiskFileItem;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
 
-import java.io.File;
+import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -49,6 +53,11 @@ public class ClientDataService {
     @Autowired TransactionService transactionService;
 
 
+    /**
+     * function to handle the file upload request by the client
+     * @param request UploadRequest object that contains file, filehash and userKey
+     * @return true if the file upload request is processed
+     * */
 
     public boolean uploadFile(UploadRequest request){
         Client client;
@@ -92,11 +101,24 @@ public class ClientDataService {
             return false;
         }
 
-        //todo: agree on fileHash
+        //agree on generated file hash with the user sent file hash
+        String fileHash = null;
+        try {
+            fileHash = getFileHash(file);
+            if (fileHash ==null)
+                throw new CustomException("cannot calculate hash of file");
+            if (! fileHash.equals(request.getFileHash())){
+                throw new CustomException("hash doesn't match with the client sent hash !");
+            }else{
+                System.out.println("verified file hash !");
+            }
+        } catch (IOException e) {
+            return false;
+        }
 
         // create new client data
         ClientData clientData = new ClientData();
-        clientData.setFileHash(getFileHash(file));
+        clientData.setFileHash(fileHash);
         clientData.setRenewedDate(currentTimeStamp);
         clientData.setEndingDate(endingTimestamp);
         clientData.setFileDataPath(savedFilePath);
@@ -106,10 +128,17 @@ public class ClientDataService {
         // add transaction
         transactionService.txnFileUpload(client.getClientPublicKey(), clientData.getFileHash());
 
-        //todo: agree storage in contract
+        //todo CONTRACT: verify the file storage request on contract
 
         return true;
     }
+
+
+    /**
+     * function to send back the file when user requests it.
+     * @param request DownloadRequest object that contains the userKey and filehash
+     * @return requested file
+     * */
 
     public File getFile(DownloadRequest request){
         ClientData clientData;
@@ -148,8 +177,17 @@ public class ClientDataService {
         // add transaction
         transactionService.txnFileDownload(optClient.get().getClientPublicKey(), clientData.getFileHash());
 
+        // return file
         return new File(clientData.getFileDataPath());
     }
+
+
+
+    /**
+     * function to renew the file storage subscription
+     * @param request RenewRequest object that contains userKey and fileHash
+     * @return true is the renew process is successful
+     * */
 
     public boolean renewFile(RenewRequest request) {
         ClientData clientData;
@@ -184,11 +222,17 @@ public class ClientDataService {
         // add transaction
         transactionService.txnSubsRenew(optClient.get().getClientPublicKey(), clientData.getFileHash());
 
-        // todo: agree in contract
+        // todo CONTRACT: agree to the update request in contract
         return true;
     }
 
-    //todo: use this using dto response
+
+    /**
+     * function to return the details of the file
+     * @param fileHash hash of the file whose detail is to be searched
+     * @return ClientDataDto object that contains the file details
+     * */
+
     public ClientDataDto getStatusOfFile(String fileHash){
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(fileHash);
@@ -199,6 +243,12 @@ public class ClientDataService {
            return ClientDataDto.fromClientData(optData.get());
         }
     }
+
+    /**
+     * function to return the details of all the files of any user
+     * @param userKey user key of the user whose all file details is to be returned
+     * @return list of ClientDataDto object that contains the file details of each one
+     * */
 
     public List<ClientDataDto> listAllFiles(String userKey) {
         // check if user exists
@@ -216,10 +266,25 @@ public class ClientDataService {
     }
 
 
-    //todo: implement this
-    private String getFileHash(MultipartFile file) {
-        return "dummyFileHash";
+    /**
+     * function to calculate <></>he hash of file
+     * @param file MultipartFile that is sent by the user to store in node
+     * @return hash of file
+     * */
+
+    private static String getFileHash(MultipartFile file) throws IOException {
+        File convFile = new File(file.getOriginalFilename());
+        if (convFile.createNewFile() ){
+            try (FileOutputStream fos = new FileOutputStream(convFile)) {
+                fos.write(file.getBytes());
+                return com.google.common.io.Files.hash(convFile,Hashing.sha256()).toString();
+            }
+        }
+        return null;
     }
 
+    private static String getFileHash(File file) throws IOException {
+        return com.google.common.io.Files.hash(file,Hashing.sha256()).toString();
+    }
 
 }
