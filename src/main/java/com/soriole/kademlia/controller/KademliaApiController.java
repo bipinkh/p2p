@@ -95,7 +95,7 @@ public class KademliaApiController {
     @GetMapping(value = "/store/{key}:{value}")
     public int store(@PathVariable("key") String paramKey, @PathVariable("value") String value,@RequestParam(value = "clone",required = false) Integer redundancy) {
         try {
-            if(redundancy!=null) {
+            if(redundancy==null) {
                 return kademliaService.getDHT().put(new Key(paramKey), value.getBytes());
             }
             else{
