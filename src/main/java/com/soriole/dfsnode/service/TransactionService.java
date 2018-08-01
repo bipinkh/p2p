@@ -4,6 +4,8 @@ import com.soriole.dfsnode.model.db.Transaction;
 import com.soriole.dfsnode.model.db.TransactionTypeEnum;
 import com.soriole.dfsnode.model.dto.TransactionDto;
 import com.soriole.dfsnode.repository.TransactionRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +22,8 @@ import static com.soriole.dfsnode.Constants.not_applicable;
  */
 @Service
 public class TransactionService {
+
+    Logger LOGGER = LoggerFactory.getLogger(TransactionService.class);
 
     @Autowired
     TransactionRepository transactionRepository;
@@ -40,7 +44,7 @@ public class TransactionService {
                     not_applicable
                 )
             );
-        System.out.println("new transaction : "+transaction.toString());
+        LOGGER.info("File Upload Transaction :: %s",transaction.toString());
         return TransactionDto.fromTransaction(transaction);
     }
 
@@ -61,7 +65,7 @@ public class TransactionService {
                                 not_applicable
                         )
                 );
-        System.out.println("new transaction : "+transaction.toString());
+        LOGGER.info("File Download Transaction :: %s", transaction.toString());
         return TransactionDto.fromTransaction(transaction);
     }
 
@@ -81,7 +85,7 @@ public class TransactionService {
                                 not_applicable
                         )
                 );
-        System.out.println("new transaction : "+transaction.toString());
+        LOGGER.info("File Renew Transaction :: %s", transaction.toString());
         return TransactionDto.fromTransaction(transaction);
     }
 

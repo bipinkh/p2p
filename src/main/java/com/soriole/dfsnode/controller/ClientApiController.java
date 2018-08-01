@@ -3,7 +3,10 @@ package com.soriole.dfsnode.controller;
 import com.soriole.dfsnode.model.dto.*;
 import com.soriole.dfsnode.service.ClientDataService;
 import com.soriole.dfsnode.service.TransactionService;
+import com.soriole.kademlia.controller.KademliaApiController;
 import com.soriole.kademlia.model.remote.NodeInfoCollectionBean;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,7 +32,6 @@ public class ClientApiController {
 
     @GetMapping("/ping")
     public ResponseEntity<String> ping(){
-        System.out.println("ping request");
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Server Running");
     }
 
@@ -37,31 +39,26 @@ public class ClientApiController {
 
     @PostMapping("/file/upload")
     public ResponseEntity<Boolean> uploadFile(UploadRequest request){
-        System.out.println("file upload request");
         return clientDataService.uploadFile(request);
     }
 
     @PostMapping("/file/download")
     public ResponseEntity<File> downloadFile(DownloadRequest request){
-        System.out.println("download request");
         return clientDataService.getFile(request);
     }
 
     @PostMapping("/file/renew")
     public ResponseEntity<Boolean> renewFile(RenewRequest request){
-        System.out.println("renew request");
         return clientDataService.renewFile(request);
     }
 
     @GetMapping("/file/getstatus")
     public ResponseEntity<ClientDataDto> renewFile(@RequestParam("file_hash") String fileHash){
-        System.out.println("file status request");
         return clientDataService.getStatusOfFile(fileHash);
     }
 
     @GetMapping("/file/listmyfiles")
     public List<ClientDataDto> listOfFiles(@RequestParam("userKey") String userKey){
-        System.out.println("list my files request");
         return clientDataService.listAllFiles(userKey);
     }
 
@@ -69,7 +66,6 @@ public class ClientApiController {
 
     @GetMapping("/transactions")
     public List<TransactionDto> getAllTransactionsOfUser(@RequestParam("userKey") String userKey){
-        System.out.println("transaction request");
         return transactionService.getAllTransactions(userKey);
     }
 }

@@ -10,6 +10,9 @@ import com.soriole.dfsnode.model.dto.RenewRequest;
 import com.soriole.dfsnode.model.dto.UploadRequest;
 import com.soriole.dfsnode.repository.ClientDataRepository;
 import com.soriole.dfsnode.repository.ClientRepository;
+import com.soriole.kademlia.controller.KademliaApiController;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -37,6 +40,10 @@ import java.util.Optional;
 // services for file upload and download
     @Service
 public class ClientDataService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientDataService.class);
+
+
 
     @Value("${dfs.params.subscriptionlength}")
     private int SUBSCRIPTON_LENGTH_MONTH;
@@ -81,6 +88,7 @@ public class ClientDataService {
 //                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
         }
 
+        LOGGER.info("created new client :: %s ",client.getClientPublicKey());
         //agree on generated file hash with the user sent file hash
         String fileHash = null;
         try {
@@ -111,14 +119,12 @@ public class ClientDataService {
             }
 
             // save file
-            System.out.println("writing file");
             byte[] bytes = file.getBytes();
             Path path = Paths.get(savedFilePath);
             Files.write(path, bytes);
-            System.out.println("file saved");
-
+            LOGGER.info("file stored : hash = %s for user = %s ", fileHash , optClient.get().getClientPublicKey());
         }catch (Exception e){
-            System.out.println("Error: "+e.getMessage());
+            LOGGER.info("exception during file storage :: %s ", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .header("message", "There is server error in processing with your request")
@@ -159,7 +165,7 @@ public class ClientDataService {
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
         if (!optClient.isPresent()){
-            System.out.println("user do not have file");
+            LOGGER.info("Request received from user %s that has no any file in this node.", request.getUserKey());
             return ResponseEntity
                     .badRequest()
                     .header("message", "You do not have any files in this system !")
@@ -226,8 +232,7 @@ public class ClientDataService {
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
         if (!optClient.isPresent()){
-            System.out.println("user do not have file");
-            System.out.println("user do not have file");
+            LOGGER.info("File Renew Request from : %s , has no any file in this node.", request.getUserKey());
             return ResponseEntity
                     .badRequest()
                     .header("message", "You do not have any files in this system !")
@@ -237,7 +242,7 @@ public class ClientDataService {
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(request.getFilehash());
         if (!optData.isPresent()){
-            System.out.println("user do not have the file with given hash");
+            LOGGER.info("User %s requested for non existing file %s", optClient.get().getClientPublicKey() , request.getFilehash());
             return ResponseEntity
                     .badRequest()
                     .header("message", "File with given hash is not found in your record !")
@@ -251,7 +256,6 @@ public class ClientDataService {
         Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
         calendar.add(Calendar.MONTH, SUBSCRIPTON_LENGTH_MONTH);
         Timestamp endingTimestamp = new Timestamp(calendar.getTime().getTime());
-        System.out.println(currentTimeStamp.toString());
         clientData.setRenewedDate(currentTimeStamp);
         clientData.setEndingDate(endingTimestamp);
         clientData.setCurrentDownloadCount(0);
@@ -282,7 +286,8 @@ public class ClientDataService {
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(fileHash);
         if (!optData.isPresent()){
-            System.out.println("user do not have the file with given hash");
+            LOGGER.info("File Status Request for non existing file :: %s ", fileHash);
+
             return ResponseEntity
                     .ok()
                     .header("message","File with given hash is not found in your record !")
@@ -302,7 +307,7 @@ public class ClientDataService {
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(userKey);
         if (!optClient.isPresent()){
-            System.out.println("user do not have file");
+            LOGGER.info("List all files request from user %s that has no any file in this node.", userKey);
             throw new CustomException("user do not have any files currently in this node");
         }
 

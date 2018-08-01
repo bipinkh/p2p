@@ -1,6 +1,8 @@
 package com.soriole.dfsnode.service;
 
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -11,6 +13,7 @@ import java.security.MessageDigest;
  */
 public class HashService {
     public static String hash(String message, String algorithm){
+        Logger logger = LoggerFactory.getLogger(HashService.class);
         String encodedHashString = null;
         try{
             MessageDigest digest = MessageDigest.getInstance(algorithm);
@@ -19,7 +22,7 @@ public class HashService {
             return encodedHashString;
         }
         catch(Exception e){
-            System.out.println("Exception occured during hashing ::: "+e);
+            logger.info("Exception occured during hashing ::: "+e);
         }
         return encodedHashString;
     }
