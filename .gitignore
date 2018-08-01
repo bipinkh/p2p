@@ -30,3 +30,5 @@ out/
 files/
 .gradle/
 files/
+
+.fuse_hidden*
