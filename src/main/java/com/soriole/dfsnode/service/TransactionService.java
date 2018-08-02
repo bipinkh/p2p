@@ -44,7 +44,7 @@ public class TransactionService {
                     not_applicable
                 )
             );
-        LOGGER.info("File Upload Transaction :: %s",transaction.toString());
+        LOGGER.info("File Upload Transaction :: {}",transaction.toString());
         return TransactionDto.fromTransaction(transaction);
     }
 
@@ -65,7 +65,7 @@ public class TransactionService {
                                 not_applicable
                         )
                 );
-        LOGGER.info("File Download Transaction :: %s", transaction.toString());
+        LOGGER.info("File Download Transaction :: {}", transaction.toString());
         return TransactionDto.fromTransaction(transaction);
     }
 
@@ -85,7 +85,7 @@ public class TransactionService {
                                 not_applicable
                         )
                 );
-        LOGGER.info("File Renew Transaction :: %s", transaction.toString());
+        LOGGER.info("File Renew Transaction :: {}", transaction.toString());
         return TransactionDto.fromTransaction(transaction);
     }
 

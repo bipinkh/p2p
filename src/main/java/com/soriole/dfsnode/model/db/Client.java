@@ -34,4 +34,11 @@ public class Client {
         data.setClient(this);
     }
 
+    @Override
+    public String toString() {
+        return "Client{" +
+                "id=" + id +
+                ", clientPublicKey='" + clientPublicKey + '\'' +
+                '}';
+    }
 }

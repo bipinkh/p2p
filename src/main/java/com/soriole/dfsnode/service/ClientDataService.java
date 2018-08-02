@@ -82,6 +82,7 @@ public class ClientDataService {
             client = new Client();
             client.setClientPublicKey(request.getUserKey());
             client = clientRepository.getOne(clientRepository.save(client).getId());   // get reference
+            LOGGER.info("created new client :: ({}) ",client.getClientPublicKey());
         }else{
             client = clientRepository.getOne( optClient.get().getId() );
 
@@ -89,7 +90,21 @@ public class ClientDataService {
 //                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
         }
 
-        LOGGER.info("created new client :: ({}) ",client.getClientPublicKey());
+        // create directory if not already created.
+        MultipartFile file = request.getFile();
+        String fileName = file.getOriginalFilename();
+        String folderPath = BASE_FOLDER.concat(client.getClientPublicKey().concat("//"));
+        File directory = new File(String.valueOf(BASE_FOLDER+client.getClientPublicKey()));
+        if(!directory.exists()){
+            if (! directory.mkdir() ){
+                LOGGER.info("Failed to create folder for new user {}"+request.getUserKey());
+                return ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .header("message", "Could not create your credentials. Please try one more time.")
+                        .body(false);
+            }
+        }
+
         //agree on generated file hash with the user sent file hash
         String fileHash = null;
         try {
@@ -107,23 +122,14 @@ public class ClientDataService {
         }
 
 
-        // create directory if not already created.
-        MultipartFile file = request.getFile();
-        String fileName = file.getOriginalFilename();
-        String folderPath = BASE_FOLDER.concat(client.getClientPublicKey().concat("//"));
+
         String savedFilePath = folderPath.concat(fileName).concat("//");
         try{
-            File directory = new File(String.valueOf(BASE_FOLDER+client.getClientPublicKey()));
-            if(!directory.exists()){
-                System.out.println("folder not found. creating new folder for user");
-                directory.mkdir();
-            }
-
             // save file
             byte[] bytes = file.getBytes();
             Path path = Paths.get(savedFilePath);
             Files.write(path, bytes);
-            LOGGER.info("file stored : hash = ({}) for user = ({}) ", fileHash , optClient.get().getClientPublicKey());
+//            LOGGER.info("file stored : hash = ({}) for user = ({}) ", fileHash , request.getUserKey());
         }catch (Exception e){
             LOGGER.info("exception during file storage :: ({}) ", e.getMessage());
             return ResponseEntity
