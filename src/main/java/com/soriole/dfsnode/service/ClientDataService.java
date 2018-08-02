@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -43,7 +44,7 @@ public class ClientDataService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ClientDataService.class);
 
-
+    public static String RESPONSE_MESSAGE="You are good to go.";
 
     @Value("${dfs.params.subscriptionlength}")
     private int SUBSCRIPTON_LENGTH_MONTH;
@@ -88,7 +89,7 @@ public class ClientDataService {
 //                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
         }
 
-        LOGGER.info("created new client :: %s ",client.getClientPublicKey());
+        LOGGER.info("created new client :: ({}) ",client.getClientPublicKey());
         //agree on generated file hash with the user sent file hash
         String fileHash = null;
         try {
@@ -114,7 +115,7 @@ public class ClientDataService {
         try{
             File directory = new File(String.valueOf(BASE_FOLDER+client.getClientPublicKey()));
             if(!directory.exists()){
-                System.out.println("folder not found creating new folder for user");
+                System.out.println("folder not found. creating new folder for user");
                 directory.mkdir();
             }
 
@@ -122,9 +123,9 @@ public class ClientDataService {
             byte[] bytes = file.getBytes();
             Path path = Paths.get(savedFilePath);
             Files.write(path, bytes);
-            LOGGER.info("file stored : hash = %s for user = %s ", fileHash , optClient.get().getClientPublicKey());
+            LOGGER.info("file stored : hash = ({}) for user = ({}) ", fileHash , optClient.get().getClientPublicKey());
         }catch (Exception e){
-            LOGGER.info("exception during file storage :: %s ", e.getMessage());
+            LOGGER.info("exception during file storage :: ({}) ", e.getMessage());
             return ResponseEntity
                     .status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .header("message", "There is server error in processing with your request")
@@ -159,7 +160,7 @@ public class ClientDataService {
      * @return requested file
      * */
 
-    public ResponseEntity<File> getFile(DownloadRequest request){
+    public ResponseEntity<FileSystemResource> getFile(DownloadRequest request){
         ClientData clientData;
 
         // check if user exists
@@ -215,7 +216,7 @@ public class ClientDataService {
                 .header("message", "File downloaded. Remaining downloads : "
                         + (10 - clientData.getCurrentDownloadCount()))
                 //todo: remove hardcoding here
-                .body(new File(clientData.getFileDataPath()));
+                .body(new FileSystemResource(clientData.getFileDataPath()));
     }
 
 
@@ -232,7 +233,7 @@ public class ClientDataService {
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(request.getUserKey());
         if (!optClient.isPresent()){
-            LOGGER.info("File Renew Request from : %s , has no any file in this node.", request.getUserKey());
+            LOGGER.info("File Renew Request from : ({}) , has no any file in this node.", request.getUserKey());
             return ResponseEntity
                     .badRequest()
                     .header("message", "You do not have any files in this system !")
@@ -242,7 +243,7 @@ public class ClientDataService {
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(request.getFilehash());
         if (!optData.isPresent()){
-            LOGGER.info("User %s requested for non existing file %s", optClient.get().getClientPublicKey() , request.getFilehash());
+            LOGGER.info("User ({}) requested for non existing file ({})", optClient.get().getClientPublicKey() , request.getFilehash());
             return ResponseEntity
                     .badRequest()
                     .header("message", "File with given hash is not found in your record !")
@@ -286,7 +287,7 @@ public class ClientDataService {
         // check if file exists
         Optional<ClientData> optData = clientDataRepository.findByFileHash(fileHash);
         if (!optData.isPresent()){
-            LOGGER.info("File Status Request for non existing file :: %s ", fileHash);
+            LOGGER.info("File Status Request for non existing file :: ({}) ", fileHash);
 
             return ResponseEntity
                     .ok()
@@ -307,7 +308,7 @@ public class ClientDataService {
         // check if user exists
         Optional<Client> optClient = clientRepository.findByClientPublicKey(userKey);
         if (!optClient.isPresent()){
-            LOGGER.info("List all files request from user %s that has no any file in this node.", userKey);
+            LOGGER.info("List all files request from user ({}) that has no any file in this node.", userKey);
             throw new CustomException("user do not have any files currently in this node");
         }
 

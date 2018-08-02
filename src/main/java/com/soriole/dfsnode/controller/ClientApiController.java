@@ -8,7 +8,9 @@ import com.soriole.kademlia.model.remote.NodeInfoCollectionBean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,11 +41,13 @@ public class ClientApiController {
 
     @PostMapping("/file/upload")
     public ResponseEntity<Boolean> uploadFile(UploadRequest request){
+
         return clientDataService.uploadFile(request);
     }
 
-    @PostMapping("/file/download")
-    public ResponseEntity<File> downloadFile(DownloadRequest request){
+    @PostMapping(value = "/file/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    public ResponseEntity<FileSystemResource> downloadFile(DownloadRequest request){
         return clientDataService.getFile(request);
     }
 
