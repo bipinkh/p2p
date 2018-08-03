@@ -46,7 +46,7 @@ public class NodeService {
         Integer activeClients = clientDataRepository.countDistinctByClientAndEndingDateBefore(currentTimeStamp);
 
         return ResponseEntity.ok(
-                new NodeDetails(totalFileReceived, totalFileDownloaded, totalStorageProvided, activeFiles,totalClients, activeClients);
+                new NodeDetails(totalFileReceived, totalFileDownloaded, totalStorageProvided, activeFiles,totalClients, activeClients)
         );
     }
 
