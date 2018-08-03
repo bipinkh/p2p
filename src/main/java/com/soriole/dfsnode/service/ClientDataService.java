@@ -86,9 +86,10 @@ public class ClientDataService {
         }else{
             client = clientRepository.getOne( optClient.get().getId() );
 
-//            if ( clientDataRepository.findByFileHashAndClient(request.getFileHash(), client).isPresent() )
-//                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
+            if ( clientDataRepository.findByFileHashAndClient(request.getFileHash(), client).isPresent() )
+                return ResponseEntity.badRequest().header("message","file with given hash already exists on this node").body(false);
         }
+
 
         // create directory if not already created.
         MultipartFile file = request.getFile();
