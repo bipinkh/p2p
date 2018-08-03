@@ -13,4 +13,22 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class NodeDetails {
 
+    // counter from inception
+    private Integer totalFileReceived;
+    private Integer totalFileDownloaded;
+    private Integer totalStorageProvided;
+
+    // counter of active
+    private Integer activeFileReceived;
+    private Integer activeFileDownloaded;
+
+    // counter for today
+    private Integer todayFileReceived;
+    private Integer todayFileDownloaded;
+
+    // counter for user
+    private Integer totalClients;
+    private Integer activeClients;
+
+
 }
