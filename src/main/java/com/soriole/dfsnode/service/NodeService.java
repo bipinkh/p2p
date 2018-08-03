@@ -7,12 +7,15 @@ import com.soriole.dfsnode.model.dto.NodeDetails;
 import com.soriole.dfsnode.model.dto.NodeTransactionDetails;
 import com.soriole.dfsnode.model.dto.TransactionDto;
 import com.soriole.dfsnode.repository.ClientDataRepository;
+import com.soriole.dfsnode.repository.ClientRepository;
 import com.soriole.dfsnode.repository.TransactionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,6 +29,8 @@ import java.util.List;
 public class NodeService {
 
     @Autowired
+    ClientRepository clientRepository;
+    @Autowired
     ClientDataRepository clientDataRepository;
     @Autowired
     TransactionRepository transactionRepository;
@@ -36,17 +41,32 @@ public class NodeService {
         Calendar calendar = Calendar.getInstance();
         Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
 
-        Integer totalFileReceived = clientDataRepository.countDistinctByFileHash();
-        Integer totalFileDownloaded = 0;
-        Integer totalStorageProvided= 0;
+        long totalFileReceived = clientDataRepository.count();
+        long totalFileDownloaded = 0;
+        try {
+            totalFileDownloaded = clientDataRepository.getSumOfDownloads();
+        }catch (Exception e){
+        }
 
-        Integer activeFiles = clientDataRepository.countDistinctByEndingDateBefore(currentTimeStamp);
+        double totalStorageProvided= 0;
+        List<String> allFilePaths = new ArrayList<>();
+        try{
+            allFilePaths = clientDataRepository.getALlFileDataPath();
+            for (String filepath : allFilePaths){
+                File file = new File(filepath);
+                totalStorageProvided += file.length();
+            }
+            totalStorageProvided /= (1024*1024);
+        } catch (Exception e){
+            System.out.println("failed to calculate the totaldownloads");
+        }
 
-        Integer totalClients = clientDataRepository.countDistinctByClient();
-        Integer activeClients = clientDataRepository.countDistinctByClientAndEndingDateBefore(currentTimeStamp);
+
+
+        long totalClients = clientRepository.count();
 
         return ResponseEntity.ok(
-                new NodeDetails(totalFileReceived, totalFileDownloaded, totalStorageProvided, activeFiles,totalClients, activeClients)
+                new NodeDetails(totalFileReceived, totalFileDownloaded, totalStorageProvided,totalClients)
         );
     }
 

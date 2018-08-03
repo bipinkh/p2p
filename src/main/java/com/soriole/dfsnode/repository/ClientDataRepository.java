@@ -22,12 +22,10 @@ public interface ClientDataRepository extends JpaRepository<ClientData, Long> {
     Optional<ClientData> findByFileHash(String hash);
     List<ClientData> findAllByClient(Client client);
     Optional<ClientData> findByFileHashAndClient(String fileHash, Client client);
-    @NotNull
-    List<ClientData> findAll();
 
-    Integer countDistinctByEndingDateBefore(Timestamp today);
-    Integer countDistinctByClient();
+    @Query("SELECT SUM(u.totalDownloadCount) from ClientData u")
+    long getSumOfDownloads();
 
-    Integer countDistinctByFileHash();
-    Integer countDistinctByClientAndEndingDateBefore(Timestamp today);
+    @Query("select s.fileDataPath from ClientData s")
+    List<String> getALlFileDataPath();
 }
