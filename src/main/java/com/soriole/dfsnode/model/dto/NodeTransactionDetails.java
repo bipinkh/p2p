@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -21,5 +22,9 @@ public class NodeTransactionDetails {
     private Integer lockedEarningTokens;
 
     //transactions
-    private List<TransactionDto> transactions;
+    private List<TransactionDto> transactions = new ArrayList<>();
+
+    public void addTransactionDto(TransactionDto dto){
+        this.transactions.add(dto);
+    }
 }
