@@ -13,7 +13,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -28,8 +30,26 @@ public class NodeService {
     @Autowired
     TransactionRepository transactionRepository;
 
+    //  get stats
     public ResponseEntity<NodeDetails> getStats() {
+
+        Calendar calendar = Calendar.getInstance();
+        Timestamp currentTimeStamp = new Timestamp(calendar.getTime().getTime());
+
+        Integer totalFileReceived = clientDataRepository.countDistinctByFileHash();
+        Integer totalFileDownloaded = 0;
+        Integer totalStorageProvided= 0;
+
+        Integer activeFiles = clientDataRepository.countDistinctByEndingDateBefore(currentTimeStamp);
+
+        Integer totalClients = clientDataRepository.countDistinctByClient();
+        Integer activeClients = clientDataRepository.countDistinctByClientAndEndingDateBefore(currentTimeStamp);
+
+        return ResponseEntity.ok(
+                new NodeDetails(totalFileReceived, totalFileDownloaded, totalStorageProvided, activeFiles,totalClients, activeClients);
+        );
     }
+
 
     // get all transaction details
     public ResponseEntity<NodeTransactionDetails> getTxns() {

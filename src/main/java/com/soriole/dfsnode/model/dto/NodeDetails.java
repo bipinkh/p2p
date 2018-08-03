@@ -19,12 +19,7 @@ public class NodeDetails {
     private Integer totalStorageProvided;
 
     // counter of active
-    private Integer activeFileReceived;
-    private Integer activeFileDownloaded;
-
-    // counter for today
-    private Integer todayFileReceived;
-    private Integer todayFileDownloaded;
+    private Integer activeFiles;
 
     // counter for user
     private Integer totalClients;
