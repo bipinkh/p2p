@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,6 @@ import java.util.List;
  * created on : 03 Aug 2018
  */
 @Controller
-@MessageMapping("/dfsnode/v1/")
 public class NodeApiController {
 //todo: remove getmapping and use messagemapping in the app if it didn't worked !
     @Autowired
@@ -36,40 +36,37 @@ public class NodeApiController {
     private SimpMessagingTemplate messagingTemplate;
 
     public void onReceivedMessage(String message){
-        this.messagingTemplate.convertAndSend("/chat",
+        this.messagingTemplate.convertAndSend("/nodedetails",
                 new SimpleDateFormat("HH:mm:ss").format(new Date())+ " - " + message);
     }
 
     /** -- Other Apis -- **/
 
-    @GetMapping("/ping")
-    public ResponseEntity<String> ping(){
-        System.out.println("check");
-        this.messagingTemplate.convertAndSend("/chat",
-                new SimpleDateFormat("HH:mm:ss").format(new Date())+ " - " + "server running");
-        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Node is Online");
+    @MessageMapping("/ping")
+    @SendTo("/topic/ping")
+    public String ping(){
+        return "bhusal is a bad boy !";
     }
 
     /** -- Stat Apis -- **/
-    @GetMapping("/stats")
-    public ResponseEntity<NodeDetails> getDetails(){
+    @MessageMapping("/stats")
+    @SendTo("/topic/stats")
+    public NodeDetails getDetails(){
         ResponseEntity<NodeDetails> entity = nodeService.getStats();
-        this.messagingTemplate.convertAndSend("/chat",
-                entity.getBody().toString());
-        return entity;
+        return entity.getBody();
     }
 
     /** -- Transaction Apis -- **/
-    @GetMapping("/transactions")
-    public ResponseEntity<NodeTransactionDetails> getTxnDetails(){
+    @MessageMapping("/transactions")
+    @SendTo("/topic/transactions")
+    public NodeTransactionDetails getTxnDetails(){
         ResponseEntity<NodeTransactionDetails> entity = nodeService.getTxns();
-        this.messagingTemplate.convertAndSend("/chat",
-                entity.getBody().toString());
-        return entity;
+        return entity.getBody();
     }
 
     /** -- Files Apis -- **/
-    @GetMapping("/files")
+    @MessageMapping("/files")
+    @SendTo("/topic/files")
     public List<ClientDataDto> listOfAllFiles(){
         List<ClientDataDto> clientDataDtos = nodeService.getFiles();
 
