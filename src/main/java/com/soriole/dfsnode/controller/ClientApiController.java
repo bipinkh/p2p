@@ -12,6 +12,7 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
@@ -30,6 +31,7 @@ public class ClientApiController {
     @Autowired
     TransactionService transactionService;
 
+
     /** -- Other Apis -- **/
 
     @GetMapping("/ping")
@@ -41,8 +43,8 @@ public class ClientApiController {
 
     @PostMapping("/file/upload")
     public ResponseEntity<Boolean> uploadFile(UploadRequest request){
-
-        return clientDataService.uploadFile(request);
+        ResponseEntity<Boolean> returnObj = clientDataService.uploadFile(request);
+        return returnObj;
     }
 
     @PostMapping(value = "/file/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
