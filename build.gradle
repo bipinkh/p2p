@@ -41,7 +41,11 @@ dependencies {
     compile group: 'org.mapdb', name: 'mapdb', version: '3.0.5'
     runtime group: 'com.h2database', name: 'h2', version: '1.4.197'
     compileOnly 'org.projectlombok:lombok:1.18.0'
-    compile ('org.web3j:core:3.5.0')
+
+    // for web socket for node ui
+    compile 'org.springframework:spring-messaging:4.2.4.RELEASE'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.3'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.3'
     testCompile group: 'org.springframework.boot', name: 'spring-boot-starter-test', version: '2.0.1.RELEASE'
 }
 
