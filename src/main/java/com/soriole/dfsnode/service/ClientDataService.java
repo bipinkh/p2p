@@ -1,6 +1,7 @@
 package com.soriole.dfsnode.service;
 
 import com.google.common.hash.Hashing;
+import com.soriole.dfsnode.controller.NodeApiController;
 import com.soriole.dfsnode.exceptions.CustomException;
 import com.soriole.dfsnode.model.db.Client;
 import com.soriole.dfsnode.model.db.ClientData;
@@ -18,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -52,6 +54,13 @@ public class ClientDataService {
     private String BASE_FOLDER;
     @Value("${dfs.params.totalDownloads}")
     private int TOTAL_DOWNLOAD_COUNT;
+
+
+    // for push notification
+    @Autowired
+    SimpMessagingTemplate template;
+    @Autowired
+    NodeApiController nodeApiController;
 
     @Autowired
     ClientService clientService;
@@ -154,6 +163,12 @@ public class ClientDataService {
 
         //todo CONTRACT: verify the file storage request on contract
 
+        this.template.convertAndSend("/topic/popup",nodeApiController.popop("New File Uploaded by user : "+request.getUserKey()));
+        this.template.convertAndSend("/topic/files",nodeApiController.listOfAllFiles());
+        this.template.convertAndSend("/topic/stats",nodeApiController.getDetails());
+        this.template.convertAndSend("/topic/transactions",nodeApiController.getTxnDetails());
+        this.template.convertAndSend("/topic/routingtable",nodeApiController.routingtable());
+
         return ResponseEntity
                 .ok()
                 .header("message", "Your File is stored. Verify it in contract !")
@@ -216,6 +231,13 @@ public class ClientDataService {
 
         // add transaction
         transactionService.txnFileDownload(optClient.get().getClientPublicKey(), clientData.getFileHash());
+
+        this.template.convertAndSend("/topic/popup",nodeApiController.popop("File :: "+clientData.getFileHash()+" downloaded by user :: " + optClient.get().getClientPublicKey()));
+        this.template.convertAndSend("/topic/files",nodeApiController.listOfAllFiles());
+        this.template.convertAndSend("/topic/stats",nodeApiController.getDetails());
+        this.template.convertAndSend("/topic/transactions",nodeApiController.getTxnDetails());
+        this.template.convertAndSend("/topic/routingtable",nodeApiController.routingtable());
+
 
         // return file
         return ResponseEntity
