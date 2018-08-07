@@ -168,6 +168,8 @@ public class ClientDataService {
         this.template.convertAndSend("/topic/stats",nodeApiController.getDetails());
         this.template.convertAndSend("/topic/transactions",nodeApiController.getTxnDetails());
         this.template.convertAndSend("/topic/routingtable",nodeApiController.routingtable());
+        this.template.convertAndSend("/topic/tokens",nodeApiController.myTokens());
+
 
         return ResponseEntity
                 .ok()
@@ -237,6 +239,7 @@ public class ClientDataService {
         this.template.convertAndSend("/topic/stats",nodeApiController.getDetails());
         this.template.convertAndSend("/topic/transactions",nodeApiController.getTxnDetails());
         this.template.convertAndSend("/topic/routingtable",nodeApiController.routingtable());
+        this.template.convertAndSend("/topic/tokens",nodeApiController.myTokens());
 
 
         // return file

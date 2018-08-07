@@ -1,5 +1,7 @@
 package com.soriole.dfsnode.controller;
 
+import com.soriole.dfsnode.blockchain.BlockchainCred;
+import com.soriole.dfsnode.blockchain.service.BlockchainService;
 import com.soriole.dfsnode.model.dto.*;
 import com.soriole.dfsnode.service.ClientDataService;
 import com.soriole.dfsnode.service.TransactionService;
@@ -16,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
+import java.math.BigInteger;
 import java.util.List;
 
 /**
@@ -44,13 +47,16 @@ public class ClientApiController {
     @PostMapping("/file/upload")
     public ResponseEntity<Boolean> uploadFile(UploadRequest request){
         ResponseEntity<Boolean> returnObj = clientDataService.uploadFile(request);
+        BlockchainCred.getBlockchainService().getDecentralizedDB().decreaseToken(BigInteger.valueOf(4)).sendAsync();
         return returnObj;
     }
 
     @PostMapping(value = "/file/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
     @ResponseBody
     public ResponseEntity<FileSystemResource> downloadFile(DownloadRequest request){
-        return clientDataService.getFile(request);
+        ResponseEntity<FileSystemResource> app =  clientDataService.getFile(request);
+        BlockchainCred.getBlockchainService().getDecentralizedDB().increaseToken(BigInteger.valueOf(6)).sendAsync();
+        return app;
     }
 
     @PostMapping("/file/renew")

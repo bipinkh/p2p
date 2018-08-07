@@ -1,6 +1,8 @@
 package com.soriole.dfsnode.controller;
 
+import com.soriole.dfsnode.blockchain.BlockchainCred;
 import com.soriole.dfsnode.model.dto.ClientDataDto;
+//import com.soriole.dfsnode.model.dto.Balances;
 import com.soriole.dfsnode.model.dto.NodeDetails;
 import com.soriole.dfsnode.model.dto.NodeTransactionDetails;
 import com.soriole.dfsnode.service.NodeService;
@@ -14,6 +16,7 @@ import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -53,6 +56,29 @@ public class NodeApiController {
     public NodeInfoCollectionBean routingtable(){
         System.out.println("Broadcasting routing table");
         return kademliaApiController.getRoutingTable();
+    }
+
+    @MessageMapping("/buytoken")
+    @SendTo("/topic/hahaha")
+    public void getTokens(){
+        System.out.println("buying tokens");
+        BlockchainCred.getBlockchainService().buyToken(BigInteger.valueOf(1000));
+        System.out.println("bought tokens");
+    }
+
+
+
+    @MessageMapping("/checktoken")
+    @SendTo("/topic/tokens")
+    public BalanceDto myTokens(){
+        try {
+            BigInteger tokens =  BlockchainCred.getBlockchainService().getTokenBalance();
+            BigInteger ethereum =  BlockchainCred.getBlockchainService().getEthereumBalance();
+            return new BalanceDto(tokens.doubleValue(),ethereum.doubleValue() / (10^18));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new BalanceDto(0,0);
+        }
     }
 
 

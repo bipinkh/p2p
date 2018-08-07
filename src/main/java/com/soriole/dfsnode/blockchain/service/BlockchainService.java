@@ -1,6 +1,6 @@
-package com.soriole.blockchain.service;
+package com.soriole.dfsnode.blockchain.service;
 
-import com.soriole.blockchain.wrapper.DecentralizedDB;
+import com.soriole.dfsnode.blockchain.wrapper.DecentralizedDB;
 import com.soriole.dfsnode.service.ClientDataService;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,28 +17,23 @@ import org.web3j.protocol.http.HttpService;
 import org.web3j.tuples.generated.Tuple5;
 import org.web3j.tx.Contract;
 import org.web3j.tx.ManagedTransaction;
-import sun.rmi.runtime.Log;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
+
 @Service
 public class BlockchainService {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ClientDataService.class);
-    private final String NODE_HTTP_ADDRESS="https://rinkeby.infura.io/m2KNYpHH00ntWJxMAeYa";
-    private final String CONTRACT_ADDRESS="0x42594264087dFc77D5bF7Ec274caE09cE491EEcC";
+    final String NODE_HTTP_ADDRESS="https://rinkeby.infura.io/v3/f4660278a7ca484f8c0d412410cbc6ac";
+    final String CONTRACT_ADDRESS="0xb7FdDA60EbD878f18F1c47270F67896C0E9F78Fa";
     private Web3j web3j;
     private Credentials credentials;
     private DecentralizedDB decentralizedDB;
     @Autowired
     ClientDataService clientDataService;
     public boolean loadWallet(String password,String walletPath){
-        File walletPath1= new File("E:\\Blockchain\\Major Project\\p2p\\src\\main\\java\\com\\soriole\\blockchain\\service");
 
         try {
             credentials = WalletUtils.loadCredentials(password,walletPath);
@@ -48,6 +43,16 @@ public class BlockchainService {
             return false;
         }
     }
+
+    public DecentralizedDB getDecentralizedDB() {
+        return decentralizedDB;
+    }
+
+    public boolean loadCredFromPrivKey(String privKey){
+        credentials = Credentials.create(privKey);
+        return true;
+    }
+
     public void loadContract() throws Exception {
         LOGGER.info("contract","public key:"+credentials.getEcKeyPair().getPublicKey());
         LOGGER.info("contract","address :"+credentials.getAddress());
@@ -79,12 +84,7 @@ public class BlockchainService {
         return  ethGetBalance.getBalance();
 
     }
-    public void verifyChunkData(byte[] chunkHash,Boolean verify) throws Exception {
-        decentralizedDB.setChunkVerifyByNode(chunkHash,verify).sendAsync();
-    }
-    public void verifyDownloadChunkData(byte[] chunkHash,Boolean verify) throws Exception {
-        decentralizedDB.setStatusOfDownLoadFileByNode(chunkHash, verify).sendAsync();
-    }
+
     public void getChunkDataOfMainFile(byte[] chunkhash) throws Exception {
         Tuple5<String , byte[], Boolean, Boolean,BigInteger> chunkData=decentralizedDB.getChunckDataOfMainFile(chunkhash).sendAsync().get();
         String  nodeAddress=chunkData.getValue1();

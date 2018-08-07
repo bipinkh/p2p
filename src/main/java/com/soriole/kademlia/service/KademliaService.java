@@ -1,5 +1,7 @@
 package com.soriole.kademlia.service;
 
+import com.soriole.dfsnode.blockchain.BlockchainCred;
+import com.soriole.dfsnode.blockchain.service.BlockchainService;
 import com.soriole.kademlia.core.KademliaConfig;
 import com.soriole.kademlia.core.KademliaExtendedDHT;
 import com.soriole.kademlia.core.store.Key;
@@ -9,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.web3j.crypto.Credentials;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -40,6 +43,9 @@ public class KademliaService {
     @Value("${kademlia.bucket.size}")
     public int bucketSize;
 
+    @Value("${dfs.params.privatekey}")
+    public String privateKey;
+
 
     private KademliaExtendedDHT kademliaDHT;
 
@@ -48,6 +54,19 @@ public class KademliaService {
 
     @PostConstruct
     public void init() throws SocketException {
+        // load contract
+        BlockchainCred.setBlockchainService(new BlockchainService());
+        BlockchainCred.getBlockchainService().loadCredFromPrivKey(privateKey);
+        System.out.println("Loaded Credentials");
+        try {
+            BlockchainCred.getBlockchainService().loadContract();
+            System.out.println("Loaded Contract");
+        } catch (Exception e) {
+            System.out.println("Loading Contract failed");
+            e.printStackTrace();
+        }
+
+
         // if the key is zero create a random key.
         Key localKey = new Key(localKeyValue);
         if (localKey.equals(new Key("0"))) {
